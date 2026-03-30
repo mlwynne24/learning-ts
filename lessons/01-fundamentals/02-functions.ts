@@ -187,4 +187,28 @@ console.log(`doubled: ${doubled}, evens: ${evens}, total: ${total}`);
 //    and returns a new number[] with the function applied to each element.
 //    (Hint: it's basically Array.map — but write it yourself with a for loop)
 
+// 1
+const celsiusToFahrenheit = (degrees: number): number => {
+  return degrees * 3;
+}
+const celsiusToFahrenheit2 = (degrees: number): number => degrees * 3;
+
+// 2
+const describePerson = (name: string, age?: number): string => {
+  return `${name}, age ${age ?? "unknown"}`;
+}
+console.log(describePerson("Morgan"));
+console.log(describePerson("Morgan", 25));
+
+//3
+type fnOp = (n: number) => number;
+const applyToAll = (array: number[], fn: fnOp) => {
+  let newArray: number[] = []
+  for (const n of array) {
+    newArray.push(fn(n));
+  }
+  return newArray;
+};
+console.log(applyToAll([5, 2, 6], (n: number) => n * 2))
+
 console.log("\n--- Lesson 02 complete --- functions");
