@@ -68,7 +68,7 @@ npm run test:watch   # Run tests in watch mode
 ## Project arc
 
 Each project builds on the last, culminating in a simplified version of
-[nanoclaw](https://github.com/anthropics/nanoclaw) — a message-driven container
+[nanoclaw](https://github.com/qwibitai/nanoclaw) — a message-driven container
 orchestrator for AI agents.
 
 ```
