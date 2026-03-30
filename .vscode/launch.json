@@ -6,7 +6,7 @@
             "request": "launch",
             "name": "Debug TS Lesson",
             "runtimeExecutable": "npx",
-            "runtimeArgs": ["ts-node", "--esm"],
+            "runtimeArgs": ["tsx"],
             "args": ["${file}"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
