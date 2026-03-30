@@ -5,11 +5,16 @@
             "type": "node",
             "request": "launch",
             "name": "Debug TS Lesson",
-            "runtimeExecutable": "npx",
-            "runtimeArgs": ["tsx"],
+            "runtimeArgs": [
+                "--require", "ts-node/register"
+            ],
             "args": ["${file}"],
             "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "sourceMaps": true,
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
+            }
         }
     ]
 }
