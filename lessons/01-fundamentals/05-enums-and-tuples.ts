@@ -235,16 +235,71 @@ console.log(`Config: ${config.host}:${config.port}`);
 // 1. Define a string enum `Status` with values: Pending, InProgress, Done, Cancelled.
 //    Write a function `isTerminal` that returns true for Done and Cancelled.
 //
+enum Status {
+  Pending = "pending",
+  InProgress = "in_progress",
+  Done = "done",
+  Cancelled = "cancelled",
+};
+
+function isTerminal (status: Status): boolean | undefined {
+  switch (status) {
+    case Status.Done || Status.Cancelled:
+      return true
+  }
+}
+
+console.log(`Pending: ${isTerminal(Status.Pending)}`)
+console.log(`Done: ${isTerminal(Status.Done)}`)
+
 // 2. Define a tuple type `CsvRow` = [id: number, name: string, score: number].
 //    Create an array of CsvRow and write a function that finds the row with
 //    the highest score, returning the whole tuple.
 //
+type CsvRow = [id: number, name: string, score: number];
+
+let array: CsvRow[] = [[1, "Morgan", 5], [2, "Gethin", 7], [3, "May", 20]];
+
+const highestScorer = (players: CsvRow[]): CsvRow => {
+  let scores: number[] = players.map((v, i, arr) => v[2]);
+  const max_score: number = Math.max(...scores);
+  const index: number = scores.indexOf(max_score)
+  return players[index]
+}
+
+const [_id, _name, _score] = highestScorer(array)
+
+console.log(`Highest scorer - Name: ${_name}, Score: ${_score}`)
+
 // 3. Write a function `minMax` that takes a number[] and returns a
 //    [min: number, max: number] tuple. Destructure the result.
 //
+const minMax = (arr: number[]): [min: number, max: number] => {
+  return [Math.min(...arr), Math.max(...arr)]
+}
+
+const [min, max] = minMax([5, 23, 643, 23, 12])
+console.log(`${min}, ${max}`)
+
 // 4. (Bonus) Use `as const` to define a config object with nested properties.
 //    Try to modify a property — observe the error. Then write a type that
 //    extracts just the literal type of one of its properties using `typeof`.
 //    Example: typeof config.host → "localhost" (not string)
+//
+const localConfig = {
+  host: "localhost",
+  port: 3000,
+  features: ["auth", "logging"],
+} as const;
+
+type Host = typeof localConfig.host
+type Port = typeof localConfig.port
+type Features = typeof localConfig.features
+
+type Config = typeof localConfig
+// The key insight: as const narrows every value to its literal type and makes everything readonly.
+//  Then typeof lets you pull those literal types out to use as type annotations elsewhere — so    
+// typeof localConfig.host is "localhost", not string. This is useful when you want to derive types
+//  from runtime values instead of duplicating them.
 
 console.log("\n--- Lesson 05 complete --- enums & tuples");

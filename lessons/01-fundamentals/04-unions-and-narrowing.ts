@@ -372,18 +372,62 @@ const handleResult = (result: Result) => {
 //    and returns a string representation. Use typeof narrowing to handle
 //    each case differently (e.g., booleans become "yes"/"no", null becomes "N/A").
 //
-
+function stringify (x: string | number | boolean | null) {
+  if (typeof x === "string") {
+    return x
+  } else if (typeof x === "number") {
+    return x.toString()
+  } else if (typeof x === "boolean") {
+    if (x === true) {
+      return "yes"
+    } else {
+      return "no"
+    }
+  } else if (x === null) {
+    return "N/A"
+  }
+}
 
 // 3. Define interfaces `EmailNotification` and `SmsNotification`, both with
 //    a `type` discriminant ("email" | "sms"). EmailNotification has `subject`
 //    and `body`. SmsNotification has `phoneNumber` and `message`.
 //    Write a function `send` that takes their union and logs appropriately.
 //
+interface EmailNotification {
+  type: "email";
+  subject: string;
+  body: string;
+};
+
+interface SmsNotification {
+  type: "sms";
+  phone_number: string;
+  message: string;
+};
+
+type Notification = EmailNotification | SmsNotification;
+
+function send (notification: Notification): undefined {
+  switch (notification.type) {
+    case "email":
+      console.log(`Subject: ${notification.subject}, Body: ${notification.body}`);
+      break;
+    case "sms":
+      console.log(`Phone number: ${notification.phone_number}, Message: ${notification.message}`);
+      break;
+  };
+};
+
 // 4. (Bonus) Write a type predicate `isNonNull` that takes a value of type
 //    T | null | undefined and returns `value is T`. Use it to filter an
 //    array: [1, null, 2, undefined, 3].filter(isNonNull)
 //    Hint: the return type is `value is T` where T is a generic — we haven't
 //    covered generics yet, so here's the signature:
 //    function isNonNull<T>(value: T | null | undefined): value is T
+function isNonNull<T>(v: T | null | undefined): v is T {
+  return v !== null && v !== undefined;
+}
+
+console.log([1, null, 2, undefined, 3].map(isNonNull))
 
 console.log("\n--- Lesson 04 complete --- unions, literals & narrowing");
