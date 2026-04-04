@@ -6,15 +6,12 @@
             "request": "launch",
             "name": "Debug TS Lesson",
             "runtimeArgs": [
-                "--require", "ts-node/register"
+                "--import", "tsx"
             ],
             "args": ["${file}"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "sourceMaps": true,
-            "env": {
-                "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
-            }
+            "sourceMaps": true
         }
     ]
 }
