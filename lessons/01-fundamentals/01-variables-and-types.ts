@@ -43,7 +43,9 @@ const notSet: undefined = undefined;
 // - null = "intentionally empty" (like Python's None)
 // In practice, most TS code uses `undefined` more than `null`.
 
-console.log(`\nTypes: ${name_} (${typeof name_}), ${age} (${typeof age}), ${isLearning} (${typeof isLearning})`);
+console.log(
+  `\nTypes: ${name_} (${typeof name_}), ${age} (${typeof age}), ${isLearning} (${typeof isLearning})`,
+);
 
 // =============================================================================
 // 3. TYPE INFERENCE
@@ -146,7 +148,7 @@ console.log(`Project: ${project.name}, ${project.weeks} weeks`);
 
 // `any` — opts out of type checking entirely. Like untyped Python.
 // AVOID THIS. Our tsconfig has "no-explicit-any" as an error.
-const dangerous: any = "anything goes";  // Legal but defeats the purpose
+const dangerous: any = "anything goes"; // Legal but defeats the purpose
 
 // `unknown` — the safe version of `any`. You must check the type before using it.
 const mystery: unknown = "could be anything";
@@ -165,14 +167,14 @@ if (typeof mystery === "string") {
 // 1. Declare a const `favouriteLanguages` as an array of strings
 const favouriteLanguages: string[] = ["TypeScript", "Python", "Rust"];
 // 2. Declare a let `currentWeek` as a number, set to 1
-let currentWeek: number = 1
+let currentWeek: number = 1;
 // 3. Create an object `learner` with name (string), week (number), languages (string[])
-const learner: {name: string; week: number; languages: string[]} = {
+const learner: { name: string; week: number; languages: string[] } = {
   name: "Morgan",
   week: 1,
   languages: ["Python", "TS"],
-}
-console.log(`\nName: ${learner.name}\nWeek: ${learner.week}\nLanguages: ${learner.languages}`)
+};
+console.log(`\nName: ${learner.name}\nWeek: ${learner.week}\nLanguages: ${learner.languages}`);
 // 4. Try assigning a wrong type to any of the above — read the error message
 // currentWeek = "1"
 // 5. Hover over inferred variables in VS Code to see what TS figured out

@@ -1,6 +1,6 @@
 # Project 6: Full-Stack Integration
 
-*Unlocks at Week 13*
+_Unlocks at Week 13_
 
 Wire the REST API, message processor, container orchestrator, and React dashboard
 into a single full-stack application. Add testing, CI, and production-readiness.

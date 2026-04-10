@@ -16,9 +16,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const pkg = JSON.parse(
-  readFileSync(join(import.meta.dirname!, "../../package.json"), "utf-8"),
-);
+const pkg = JSON.parse(readFileSync(join(import.meta.dirname!, "../../package.json"), "utf-8"));
 
 console.log("=== Our package.json ===");
 console.log(`Name: ${pkg.name}`);

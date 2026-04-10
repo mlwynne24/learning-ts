@@ -1,6 +1,6 @@
 # Project 1: CLI Tool
 
-*Unlocks at Week 4*
+_Unlocks at Week 4_
 
 Build a command-line utility that reads structured data (CSV/JSON), validates it
 with runtime type checking, and outputs a formatted report.

@@ -1,6 +1,6 @@
 # Project 4: Container Orchestrator Lite
 
-*Unlocks at Week 9*
+_Unlocks at Week 9_
 
 Build a nanoclaw-lite: receive messages via HTTP, queue them, spawn Docker containers
 to process each task, stream stdout, and return results. Includes filesystem-based IPC.

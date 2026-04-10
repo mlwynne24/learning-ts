@@ -36,34 +36,34 @@ npm run test:watch   # Run tests in watch mode
 
 ### Phase 1: Language Foundations (Weeks 1-4)
 
-| Week | Topic | Format |
-|------|-------|--------|
-| 1 | Variables, types, functions, control flow | Interactive lessons |
-| 2 | Interfaces, type aliases, unions, narrowing | Interactive lessons |
-| 3 | Modules, package.json, tsconfig, ESLint/Prettier | Interactive lessons |
-| 4 | Async/await, Promises, error handling | Interactive lessons + CLI project |
+| Week | Topic                                            | Format                            |
+| ---- | ------------------------------------------------ | --------------------------------- |
+| 1    | Variables, types, functions, control flow        | Interactive lessons               |
+| 2    | Interfaces, type aliases, unions, narrowing      | Interactive lessons               |
+| 3    | Modules, package.json, tsconfig, ESLint/Prettier | Interactive lessons               |
+| 4    | Async/await, Promises, error handling            | Interactive lessons + CLI project |
 
 ### Phase 2: Building Things (Weeks 5-8)
 
-| Week | Topic | Format |
-|------|-------|--------|
-| 5 | Generics, utility types, advanced patterns | Lessons + exercises |
-| 6 | Testing with Vitest, project structure | Lessons + REST API project |
-| 7-8 | Real-time message processor | Project (mirrors nanoclaw patterns) |
+| Week | Topic                                      | Format                              |
+| ---- | ------------------------------------------ | ----------------------------------- |
+| 5    | Generics, utility types, advanced patterns | Lessons + exercises                 |
+| 6    | Testing with Vitest, project structure     | Lessons + REST API project          |
+| 7-8  | Real-time message processor                | Project (mirrors nanoclaw patterns) |
 
 ### Phase 3: Real-World TypeScript (Weeks 9-12)
 
-| Week | Topic | Format |
-|------|-------|--------|
-| 9-10 | Container orchestrator lite | Project (nanoclaw-lite) |
-| 11-12 | React frontend + dashboard | Project |
+| Week  | Topic                       | Format                  |
+| ----- | --------------------------- | ----------------------- |
+| 9-10  | Container orchestrator lite | Project (nanoclaw-lite) |
+| 11-12 | React frontend + dashboard  | Project                 |
 
 ### Phase 4: Integration & Mastery (Weeks 13-16)
 
-| Week | Topic | Format |
-|------|-------|--------|
-| 13-14 | Full-stack integration, CI, advanced tooling | Project |
-| 15-16 | Reading & contributing to nanoclaw | Code review + contributions |
+| Week  | Topic                                        | Format                      |
+| ----- | -------------------------------------------- | --------------------------- |
+| 13-14 | Full-stack integration, CI, advanced tooling | Project                     |
+| 15-16 | Reading & contributing to nanoclaw           | Code review + contributions |
 
 ## Project arc
 

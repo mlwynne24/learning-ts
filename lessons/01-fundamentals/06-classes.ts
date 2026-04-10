@@ -70,30 +70,57 @@ console.log(`Direct access: ${laptop.name}, $${laptop.price}`);
 // Python: _private by convention, no enforcement
 // TS:     public / private / protected — enforced at compile time
 
+// 4. (Bonus) Refactor the BankAccount class to add:
+//    - A transaction history (private array of { type: "deposit" | "withdraw", amount: number, date: Date })
+//    - A getStatement() method that returns the history as a formatted string
+// ^ For reference
+type transaction = {
+  type: "deposit" | "withdraw";
+  amount: number;
+  date: Date;
+};
+
 class BankAccount {
   constructor(
     public owner: string,
     private balance: number, // only accessible inside this class
+    private transactionHistory: transaction[] = [],
   ) {}
 
   deposit(amount: number): void {
     if (amount <= 0) throw new Error("Amount must be positive");
     this.balance += amount;
+    this.transactionHistory.push({
+      type: "deposit",
+      amount: amount,
+      date: new Date(Date.now()),
+    });
   }
 
   withdraw(amount: number): void {
     if (amount > this.balance) throw new Error("Insufficient funds");
     this.balance -= amount;
+    this.transactionHistory.push({
+      type: "withdraw",
+      amount: amount,
+      date: new Date(Date.now()),
+    });
   }
 
   getBalance(): number {
     return this.balance;
   }
+
+  getStatement(): string {
+    return this.transactionHistory.map((v) => `${v.type}: ${v.amount} (${v.date})`).join("\n");
+  }
 }
 
 const account = new BankAccount("Morgan", 1000);
 account.deposit(500);
+account.withdraw(204);
 console.log(`\nBalance: $${account.getBalance()}`);
+console.log(`Statement:\n${account.getStatement()}`);
 // account.balance;  // Error: Property 'balance' is private
 
 // public    — accessible everywhere (default)
@@ -106,6 +133,10 @@ class ServerConfig {
     public readonly host: string,
     public readonly port: number,
   ) {}
+
+  server(): string {
+    return `${config.host}:${config.port}`;
+  }
 }
 
 const config = new ServerConfig("localhost", 3000);
@@ -124,11 +155,11 @@ class Temperature {
   constructor(private celsius: number) {}
 
   get fahrenheit(): number {
-    return this.celsius * 9 / 5 + 32;
+    return (this.celsius * 9) / 5 + 32;
   }
 
   set fahrenheit(f: number) {
-    this.celsius = (f - 32) * 5 / 9;
+    this.celsius = ((f - 32) * 5) / 9;
   }
 
   toString(): string {
@@ -352,20 +383,105 @@ console.log(`\nInstances created: ${Counter.getCount()}`); // 3
 //    - peek(): string | undefined
 //    - get size(): number (getter)
 //
+class Stack {
+  constructor(private items: string[] = []) {}
+
+  push(item: string): void {
+    this.items.push(item);
+  }
+
+  pop(): string | undefined {
+    return this.items.pop();
+  }
+
+  peek(): string | undefined {
+    return this.items[this.items.length - 1];
+  }
+
+  get size(): number {
+    return this.items.length;
+  }
+}
+
+let test: number[] = [];
+console.log(test[test.length - 1]);
+
 // 2. Create an abstract class `Notification` with:
 //    - abstract send(): void
 //    - a concrete method `format()` that returns "[{type}] {message}"
 //    Then create two subclasses: EmailNotification and SmsNotification.
 //
+abstract class Notification {
+  constructor(
+    protected type: string,
+    protected message: string,
+  ) {}
+
+  abstract send(): void;
+
+  format(): string {
+    return `[${this.type}] ${this.message}`;
+  }
+}
+
+class EmailNotification extends Notification {
+  constructor(
+    type: string,
+    message: string,
+    protected subject: string,
+    protected body: string,
+  ) {
+    super(type, message);
+  }
+
+  send(): void {
+    // do some send
+    console.log(`Sending ${this.subject}: ${this.body}`);
+  }
+}
+
+// SMS notification similar
+
 // 3. Create an interface `Repository` with methods:
 //    - findById(id: string): Task | undefined
 //    - save(task: Task): void
 //    - delete(id: string): boolean
 //    Implement it as `InMemoryRepository` using a private Map or array.
 //
+interface Repository {
+  findById(id: string): Task | undefined;
+  save(task: Task): void;
+  delete(id: string): boolean;
+}
+
+class InMemoryRepository implements Repository {
+  constructor(private tasks: Task[]) {}
+
+  findById(id: string): Task | undefined {
+    let tasks: Task[] = this.tasks.filter((v) => v.id === id);
+    if (tasks.length === 1) {
+      return tasks[0];
+    } else if (tasks.length > 1) {
+      throw new Error("More than one task returned. IDs are non-unique.");
+    }
+  }
+
+  save(task: Task): void {
+    this.tasks.push(task);
+  }
+
+  delete(id: string): boolean {
+    const originalLength = this.tasks.length;
+    this.tasks = this.tasks.filter((v) => v.id !== id);
+    return this.tasks.length < originalLength;
+  }
+}
+
 // 4. (Bonus) Refactor the BankAccount class to add:
 //    - A transaction history (private array of { type: "deposit" | "withdraw", amount: number, date: Date })
 //    - A getStatement() method that returns the history as a formatted string
+//
+// Answer above
 
 console.log("\n--- Lesson 06 complete --- classes");
 console.log("\n🎉 Week 1 fundamentals complete! Next up: generics, utility types, and more.");

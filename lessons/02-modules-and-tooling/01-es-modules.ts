@@ -206,14 +206,41 @@ console.log(`\nThis file has ${thisFile.split("\n").length} lines`);
 //    - A type export `type StringTransform = (s: string) => string`
 //    Import all three into this file and use them.
 //
+import { capitalize, reverse, type StringTransform } from "./helpers/string-utils.js";
+
+console.log(capitalize("hello"));
+console.log(reverse("hello"));
+
+const newTest: StringTransform = (s: string): string => {
+  return s;
+};
+
 // 2. Add the exports from string-utils to the barrel file (helpers/index.ts).
 //    Then import from "./helpers/index.js" instead.
 //
+import {
+  capitalize as c_index,
+  reverse as r_index,
+  type StringTransform as t_st_index,
+} from "./helpers/index.js";
+
 // 3. Create a `helpers/config.ts` with a default export of a config object.
 //    Import it here using both `import config from ...` and
 //    `import * as configModule from ...`. Compare what you get.
 //
+// import config from "./helpers/config.js"
+import * as configModule from "./helpers/config.js";
+
+console.log(configModule);
+
+const configTwo: configModule.Config = {
+  host: "remoteHost",
+  port: 2000,
+};
+
 // 4. (Bonus) Try importing a Node built-in with and without the `node:` prefix.
 //    Both work — but which gives better editor support? Hover to check types.
+// import { hostname, platform, cpus } from "os"
+import { hostname, platform, cpus } from "node:os";
 
 console.log("\n--- Lesson 01 complete --- ES modules");

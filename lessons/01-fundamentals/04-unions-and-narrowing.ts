@@ -87,7 +87,7 @@ console.log(describe(3.14159));
 // typeof works for: "string", "number", "boolean", "undefined", "object", "function"
 // Note: typeof null === "object" — a famous JS bug that's been there since 1995.
 if (typeof null === "object") {
-  console.log("Here is the bug!")
+  console.log("Here is the bug!");
 }
 
 // --- Truthiness narrowing ---
@@ -230,7 +230,7 @@ function areaStrict(shape: Shape): number {
 interface Pentagon {
   kind: "pentagon";
   side: number;
-};
+}
 
 // Try it: add `interface Pentagon { kind: "pentagon"; side: number; }` to
 // the Shape union. The `_exhaustive` line will immediately error — forcing
@@ -293,7 +293,7 @@ console.log(`\nName: ${displayName}`);
 // Compare with || (logical OR) — which also catches 0, "", false:
 const count: number | null = 0;
 console.log(`?? preserves 0: ${count ?? 10}`); // 0 (correct!)
-console.log(`|| loses 0: ${count || 10}`);      // 10 (probably a bug)
+console.log(`|| loses 0: ${count || 10}`); // 10 (probably a bug)
 
 // --- ?. (optional chaining) ---
 // Python: no equivalent (you'd need try/except or getattr)
@@ -323,7 +323,7 @@ console.log(`Theme color: ${color}`);
 // arr?.[0]  — only accesses if arr isn't null/undefined
 
 const arr: unknown[] = [];
-console.log(arr?.[0])
+console.log(arr?.[0]);
 
 // =============================================================================
 // 7. NON-NULL ASSERTION (use sparingly!)
@@ -331,7 +331,7 @@ console.log(arr?.[0])
 
 // When YOU know a value isn't null but TS doesn't, use `!`
 
-let element: string | null // = "definitely here";
+let element: string | null; // = "definitely here";
 const length = element!.length; // The `!` tells TS "trust me, it's not null"
 
 console.log(`\nLength: ${length}`);
@@ -351,41 +351,32 @@ console.log(`\nLength: ${length}`);
 interface SuccessfulResult {
   success: true;
   data: string;
-};
+}
 
 interface UnsuccessfulResult {
   success: false;
   error: string;
-};
+}
 
-type Result = SuccessfulResult | UnsuccessfulResult
+type Result = SuccessfulResult | UnsuccessfulResult;
 
 const handleResult = (result: Result) => {
   if (result.success) {
-    return result.data
+    return result.data;
   } else {
-    return `ERROR: ${result.error}`
+    return `ERROR: ${result.error}`;
   }
-}
+};
 
 // 2. Write a function `stringify` that takes string | number | boolean | null
 //    and returns a string representation. Use typeof narrowing to handle
 //    each case differently (e.g., booleans become "yes"/"no", null becomes "N/A").
 //
-function stringify (x: string | number | boolean | null) {
-  if (typeof x === "string") {
-    return x
-  } else if (typeof x === "number") {
-    return x.toString()
-  } else if (typeof x === "boolean") {
-    if (x === true) {
-      return "yes"
-    } else {
-      return "no"
-    }
-  } else if (x === null) {
-    return "N/A"
-  }
+function stringify(x: string | number | boolean | null): string {
+  if (typeof x === "string") return x;
+  if (typeof x === "number") return x.toString();
+  if (typeof x === "boolean") return x ? "yes" : "no";
+  return "N/A"; // x is null here
 }
 
 // 3. Define interfaces `EmailNotification` and `SmsNotification`, both with
@@ -397,26 +388,26 @@ interface EmailNotification {
   type: "email";
   subject: string;
   body: string;
-};
+}
 
 interface SmsNotification {
   type: "sms";
-  phone_number: string;
+  phoneNumber: string;
   message: string;
-};
+}
 
 type Notification = EmailNotification | SmsNotification;
 
-function send (notification: Notification): undefined {
+function send(notification: Notification): void {
   switch (notification.type) {
     case "email":
       console.log(`Subject: ${notification.subject}, Body: ${notification.body}`);
       break;
     case "sms":
-      console.log(`Phone number: ${notification.phone_number}, Message: ${notification.message}`);
+      console.log(`Phone number: ${notification.phoneNumber}, Message: ${notification.message}`);
       break;
-  };
-};
+  }
+}
 
 // 4. (Bonus) Write a type predicate `isNonNull` that takes a value of type
 //    T | null | undefined and returns `value is T`. Use it to filter an
@@ -428,6 +419,6 @@ function isNonNull<T>(v: T | null | undefined): v is T {
   return v !== null && v !== undefined;
 }
 
-console.log([1, null, 2, undefined, 3].map(isNonNull))
+console.log([1, null, 2, undefined, 3].filter(isNonNull));
 
 console.log("\n--- Lesson 04 complete --- unions, literals & narrowing");

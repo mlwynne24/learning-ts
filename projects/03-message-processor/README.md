@@ -1,6 +1,6 @@
 # Project 3: Real-Time Message Processor
 
-*Unlocks at Week 7*
+_Unlocks at Week 7_
 
 Build a message queue system with per-group concurrency control, polling-based
 ingestion, and async task execution. Directly mirrors nanoclaw's group-queue pattern.

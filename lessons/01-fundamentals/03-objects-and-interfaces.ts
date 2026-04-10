@@ -312,11 +312,11 @@ console.log("\n--- Lesson 03 complete --- objects & interfaces");
 //    durationSeconds (number), and an optional albumName.
 //    Create two Song objects — one with and one without albumName.
 interface Song {
-  title: string,
-  artist: string,
-  durationSeconds: number,
-  albumName?: string,
-};
+  title: string;
+  artist: string;
+  durationSeconds: number;
+  albumName?: string;
+}
 
 const song1: Song = {
   title: "Sing it loud",
@@ -335,25 +335,23 @@ const song2: Song = {
 //    and a readonly createdBy (string).
 //    Create a Playlist with at least 2 songs.
 interface Playlist {
-  name: string,
-  songs: Song[],
-  readonly createdBy: string
-};
+  name: string;
+  songs: Song[];
+  readonly createdBy: string;
+}
 
 const playlist1: Playlist = {
   name: "myPlaylist",
   songs: [song1, song2],
   createdBy: "me",
-}
+};
 //
 // 3. Write a function `totalDuration` that takes a Playlist and returns
 //    the total duration in seconds. Use reduce or a for loop.
 const totalDuration = (playlist: Playlist): number => {
-  return playlist.songs.reduce(
-    (total, nextSong) => total + nextSong.durationSeconds, 0,
-  );
+  return playlist.songs.reduce((total, nextSong) => total + nextSong.durationSeconds, 0);
 };
-console.log(totalDuration(playlist1))
+console.log(totalDuration(playlist1));
 //
 // 4. (Bonus) Define a type `Formatter` = (song: Song) => string.
 //    Write two formatters: one that returns "Artist - Title" and one
@@ -362,8 +360,8 @@ console.log(totalDuration(playlist1))
 type Formatter = (song: Song) => string;
 
 const toTitleCase = (s: string) => {
-  return s.replace(/\b\w/g, (c) => c.toUpperCase())
-}
+  return s.replace(/\b\w/g, (c) => c.toUpperCase());
+};
 
 const artistTitleFormatter: Formatter = (song) => {
   return `${toTitleCase(song.artist)} - ${toTitleCase(song.title)}`;
@@ -379,6 +377,6 @@ const formatSongs = (playlist: Playlist, formatter: Formatter): string[] => {
   return playlist.songs.map(formatter);
 };
 
-console.log(formatSongs(playlist1, artistTitleFormatter))
+console.log(formatSongs(playlist1, artistTitleFormatter));
 
-console.log(formatSongs(playlist1, titleDurationFormatter))
+console.log(formatSongs(playlist1, titleDurationFormatter));

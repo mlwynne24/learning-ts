@@ -157,22 +157,27 @@ const nodeAppConfig = {
 // For a library (published to npm):
 const libraryConfig = {
   ...nodeAppConfig,
-  declaration: true,          // consumers need .d.ts files
-  declarationMap: true,       // "go to definition" shows .ts source, not .d.ts
-  composite: true,            // enables project references
+  declaration: true, // consumers need .d.ts files
+  declarationMap: true, // "go to definition" shows .ts source, not .d.ts
+  composite: true, // enables project references
 };
 
 // For a React frontend (Vite):
 const reactConfig = {
   target: "ES2020",
-  module: "ESNext",           // bundler handles module format
+  module: "ESNext", // bundler handles module format
   moduleResolution: "bundler", // Vite/webpack resolution rules
-  jsx: "react-jsx",           // handle .tsx files
+  jsx: "react-jsx", // handle .tsx files
   strict: true,
 };
 
 console.log("\nNode app config keys:", Object.keys(nodeAppConfig).join(", "));
-console.log("Library adds:", Object.keys(libraryConfig).filter(k => !(k in nodeAppConfig)).join(", "));
+console.log(
+  "Library adds:",
+  Object.keys(libraryConfig)
+    .filter((k) => !(k in nodeAppConfig))
+    .join(", "),
+);
 
 // =============================================================================
 // 6. tsconfig INHERITANCE (extends)

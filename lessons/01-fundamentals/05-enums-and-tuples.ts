@@ -59,9 +59,9 @@ console.log(`404 = ${describeStatus(HttpStatus.NotFound)}`);
 // If you don't assign values, they start at 0 and increment:
 
 enum Priority {
-  Low,    // 0
+  Low, // 0
   Medium, // 1
-  High,   // 2
+  High, // 2
   Critical, // 3
 }
 
@@ -118,7 +118,7 @@ enum LogLevelEnum {
 
 const person: [string, number] = ["Morgan", 30];
 const name = person[0]; // type: string
-const age = person[1];  // type: number
+const age = person[1]; // type: number
 // person[2];           // Error: Tuple type has no element at index '2'
 
 console.log(`\nTuple: ${name}, age ${age}`);
@@ -240,17 +240,20 @@ enum Status {
   InProgress = "in_progress",
   Done = "done",
   Cancelled = "cancelled",
-};
+}
 
-function isTerminal (status: Status): boolean | undefined {
+function isTerminal(status: Status): boolean {
   switch (status) {
-    case Status.Done || Status.Cancelled:
-      return true
+    case Status.Done:
+    case Status.Cancelled:
+      return true;
+    default:
+      return false;
   }
 }
 
-console.log(`Pending: ${isTerminal(Status.Pending)}`)
-console.log(`Done: ${isTerminal(Status.Done)}`)
+console.log(`Pending: ${isTerminal(Status.Pending)}`);
+console.log(`Done: ${isTerminal(Status.Done)}`);
 
 // 2. Define a tuple type `CsvRow` = [id: number, name: string, score: number].
 //    Create an array of CsvRow and write a function that finds the row with
@@ -258,28 +261,32 @@ console.log(`Done: ${isTerminal(Status.Done)}`)
 //
 type CsvRow = [id: number, name: string, score: number];
 
-let array: CsvRow[] = [[1, "Morgan", 5], [2, "Gethin", 7], [3, "May", 20]];
+let array: CsvRow[] = [
+  [1, "Morgan", 5],
+  [2, "Gethin", 7],
+  [3, "May", 20],
+];
 
 const highestScorer = (players: CsvRow[]): CsvRow => {
-  let scores: number[] = players.map((v, i, arr) => v[2]);
+  let scores: number[] = players.map((v) => v[2]);
   const max_score: number = Math.max(...scores);
-  const index: number = scores.indexOf(max_score)
-  return players[index]
-}
+  const index: number = scores.indexOf(max_score);
+  return players[index];
+};
 
-const [_id, _name, _score] = highestScorer(array)
+const [_id, _name, _score] = highestScorer(array);
 
-console.log(`Highest scorer - Name: ${_name}, Score: ${_score}`)
+console.log(`Highest scorer - Name: ${_name}, Score: ${_score}`);
 
 // 3. Write a function `minMax` that takes a number[] and returns a
 //    [min: number, max: number] tuple. Destructure the result.
 //
 const minMax = (arr: number[]): [min: number, max: number] => {
-  return [Math.min(...arr), Math.max(...arr)]
-}
+  return [Math.min(...arr), Math.max(...arr)];
+};
 
-const [min, max] = minMax([5, 23, 643, 23, 12])
-console.log(`${min}, ${max}`)
+const [min, max] = minMax([5, 23, 643, 23, 12]);
+console.log(`${min}, ${max}`);
 
 // 4. (Bonus) Use `as const` to define a config object with nested properties.
 //    Try to modify a property — observe the error. Then write a type that
@@ -292,13 +299,13 @@ const localConfig = {
   features: ["auth", "logging"],
 } as const;
 
-type Host = typeof localConfig.host
-type Port = typeof localConfig.port
-type Features = typeof localConfig.features
+type Host = typeof localConfig.host;
+type Port = typeof localConfig.port;
+type Features = typeof localConfig.features;
 
-type Config = typeof localConfig
+type Config = typeof localConfig;
 // The key insight: as const narrows every value to its literal type and makes everything readonly.
-//  Then typeof lets you pull those literal types out to use as type annotations elsewhere — so    
+//  Then typeof lets you pull those literal types out to use as type annotations elsewhere — so
 // typeof localConfig.host is "localhost", not string. This is useful when you want to derive types
 //  from runtime values instead of duplicating them.
 
