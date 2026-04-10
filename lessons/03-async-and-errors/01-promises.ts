@@ -157,7 +157,7 @@ function fetchUserId(): Promise<string> {
 }
 
 // Inferred: Promise<{ id: string; name: string }>
-function fetchUser() {
+function fetchUser(): Promise<{ id: string; name: string }> {
   return Promise.resolve({ id: "user-123", name: "Morgan" });
 }
 
@@ -221,18 +221,64 @@ fetchUserId()
 // =============================================================================
 // 1. Write a function `wait(ms: number): Promise<void>` that resolves after ms
 //    milliseconds. Use it to log "tick" then "tock" 500ms apart.
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+console.log("tick");
+wait(500).then(() => {
+  console.log("tock");
+});
 //
 // 2. Write a function `coinFlip(): Promise<"heads" | "tails">` that resolves
 //    randomly to one of the two values after a 200ms delay.
+function coinFlip(): Promise<"heads" | "tails"> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const result = Math.random() < 0.5 ? "heads" : "tails";
+      resolve(result);
+    }, 200);
+  });
+}
+
+coinFlip().then((result) => {
+  console.log(result);
+});
 //
 // 3. Write a function `firstSuccessfulHttp(): Promise<number>` that resolves
 //    to 200 if Math.random() > 0.5, otherwise rejects with new Error("502").
 //    Use .then and .catch to log the outcome.
+function firstSuccessfulHttp(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const result = Math.random() > 0.5;
+    if (result) {
+      resolve(200);
+    } else {
+      reject(new Error("502"));
+    }
+  });
+}
+
+firstSuccessfulHttp()
+  .then((result) => console.log(`HTTP success: ${result}`))
+  .catch((err: Error) => console.log(`HTTP failed: ${err.message}`));
 //
 // 4. (Bonus) Write a function `chainOps(start: number): Promise<number>` that
 //    takes a number, multiplies by 2, then adds 10, then divides by 4 — each
 //    step in its own .then. Log the final result.
+function chainOps(start: number): Promise<number> {
+  return Promise.resolve(start)
+    .then((n) => n * 2)
+    .then((n) => n + 10)
+    .then((n) => n / 4);
+}
 
+chainOps(5).then((n) => {
+  console.log(`Final result: ${n}`);
+});
+//
 // Make sure all top-level Promises in this file are awaited or .then'd before
 // the process exits. Otherwise you'll see logs out of order.
 

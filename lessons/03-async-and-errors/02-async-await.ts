@@ -256,18 +256,92 @@ console.log(`Greetings: ${greetings.join(" | ")}`);
 // 1. Rewrite this .then chain as an async function:
 //    fetchA().then(a => fetchB().then(b => console.log(a + b)))
 //    Use Promise.all if the two fetches don't depend on each other.
+async function fetchABAndLog(): Promise<void> {
+  const [a, b] = await Promise.all([fetchA(), fetchB()]);
+  console.log(a + b);
+}
+
+await (async () => {
+  await fetchABAndLog();
+})();
 //
 // 2. Write `fetchAllUsers(ids: string[]): Promise<string[]>` that fetches each
 //    id IN PARALLEL and returns the results. Use Promise.all + map.
+async function fetchAllUsers(ids: string[]): Promise<string[]> {
+  return Promise.all(ids.map((id) => fetchItem(id)));
+}
+
+await (async () => {
+  await fetchAllUsers(ids);
+})();
 //
 // 3. Write `fetchUsersOneByOne(ids: string[]): Promise<string[]>` that fetches
 //    them sequentially (e.g., for rate-limited APIs). Use a for...of loop.
+async function fetchUsersOneByOne(ids: string[]): Promise<string[]> {
+  const results = [];
+  for (const id of ids) {
+    const result = await fetchItem(id);
+    results.push(result);
+  }
+  return results;
+}
+
+await (async () => {
+  const results = await fetchUsersOneByOne(ids);
+});
 //
 // 4. Write `safeDivide(a: number, b: number): Promise<number>` that rejects
 //    with Error("div by zero") when b is 0 and resolves to a/b otherwise.
 //    Call it from another async function and handle both cases with try/catch.
+const safeDivide = async (a: number, b: number): Promise<number> => {
+  if (b === 0) {
+    throw new Error("Division by 0 is not allowed");
+  } else {
+    return a / b;
+  }
+};
+
+async function testSafeDivide(): Promise<void> {
+  try {
+    const result1 = await safeDivide(10, 2);
+    console.log(`10 / 2 = ${result1}`);
+
+    const result2 = await safeDivide(10, 0);
+    console.log(`10 / 0 = ${result2}`);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(`safeDivide failed: ${err.message}`);
+    }
+  }
+}
+
+await (async () => {
+  await testSafeDivide();
+})();
 //
 // 5. (Bonus) Time the difference between sequential and parallel for fetching
 //    10 ids. The parallel version should be roughly 10x faster.
+const range = (start: number, end: number): number[] =>
+  Array.from({ length: end - start }, (_, i) => start + i);
+
+const testIds: string[] = range(0, 10).map((n) => n.toString());
+
+async function testTimeForFunction<TArgs extends unknown[], TResult>(
+  fn: (...args: TArgs) => Promise<TResult>,
+  type: string,
+  ...args: TArgs
+): Promise<void> {
+  const start = Date.now();
+  await fn(...args);
+  console.log(`${type.toUpperCase()}: ${Date.now() - start}ms`);
+}
+
+await (async () => {
+  await testTimeForFunction(fetchAllUsers, "parallel", testIds);
+})();
+
+await (async () => {
+  await testTimeForFunction(fetchUsersOneByOne, "sequential", testIds);
+})();
 
 console.log("\n--- Lesson 02 complete --- async / await");
