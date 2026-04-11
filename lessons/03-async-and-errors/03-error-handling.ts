@@ -311,16 +311,102 @@ console.log(handleEvent({ kind: "keypress", key: "Enter" }));
 // 1. Define a custom error class `TimeoutError` that takes a `ms` number in its
 //    constructor and produces the message "Operation timed out after Xms".
 //    Throw and catch one — log err.message in the catch block.
+class TimeoutError extends Error {
+  constructor(ms: number) {
+    super(`Operation timed out after ${ms}ms`);
+    this.name = "TimeoutError";
+  }
+}
+
+function longBoi(timeTaken: number): number {
+  if (timeTaken > 10) {
+    throw new TimeoutError(timeTaken);
+  } else {
+    return timeTaken;
+  }
+}
+
+try {
+  longBoi(20);
+} catch (err) {
+  if (err instanceof Error) {
+    console.log(`${err.name}: ${err.message}`);
+  }
+}
 //
 // 2. Write `safeJsonParse<T>(input: string): Result<T>` — return an ok variant
 //    with the parsed value, or an error variant wrapping the SyntaxError.
 //    Test it with valid and invalid JSON.
+function safeJsonParse<T>(input: string): Result<T> {
+  try {
+    const result = JSON.parse(input);
+    return { ok: true, value: result };
+  } catch (err) {
+    const cause = err instanceof Error ? err : new Error(String(err));
+    return { ok: false, error: Error("Invalid JSON input", { cause }) };
+  }
+}
+
+const validJson = safeJsonParse('{"name": "Morgan"}');
+console.log(validJson);
+const invalidJson = safeJsonParse("{name?Morgan");
+console.log(invalidJson);
 //
 // 3. Write an async `fetchJson(url: string)` that:
 //    - throws ValidationError if url doesn't start with "http"
 //    - simulates a network call (resolve a fake object after 50ms)
 //    - wraps any thrown error with `new Error("fetchJson failed", { cause: err })`
 //    Call it from another async function and log the cause chain.
+type httpReturnContent = { status: "success" | "fail"; content: string };
+
+class NetworkError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+const fakeNetworkCall = async (url: string): Promise<httpReturnContent> => {
+  const success = Math.random() > 0.5;
+  if (success) {
+    const result: httpReturnContent = { status: "success", content: "test" };
+    return new Promise((resolve) => setTimeout(() => resolve(result), 50));
+  } else {
+    throw new NetworkError("Network unaccessible");
+  }
+};
+
+async function fetchJson(url: string): Promise<httpReturnContent> {
+  if (!url.startsWith("http")) {
+    throw new ValidationError("URL must start with 'http'", "url");
+  }
+  try {
+    const result = await fakeNetworkCall(url);
+    return result;
+  } catch (err) {
+    const cause = err instanceof Error ? err : new Error(String(err));
+    throw new Error("fetchJson failed", { cause });
+  }
+}
+
+const urls = ["testURL", "http://testurl.com", "https://testingagain.co.uk"];
+
+const results = await Promise.allSettled(urls.map((u) => fetchJson(u)));
+
+for (const [i, r] of results.entries()) {
+  const url = urls[i];
+  if (r.status === "fulfilled") {
+    console.log(`${url} → ${r.value.status}: ${r.value.content}`);
+  } else {
+    const err = r.reason;
+    if (err instanceof Error) {
+      console.log(`${url} failed: ${err.message}`);
+      if (err.cause instanceof Error) {
+        console.log(`  caused by: ${err.cause.name}: ${err.cause.message}`);
+      }
+    }
+  }
+}
+
 //
 // 4. (Bonus) Use the Result type with a discriminated error union:
 //      type LoadError = { kind: "not-found" } | { kind: "permission"; user: string }
