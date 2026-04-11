@@ -413,5 +413,35 @@ for (const [i, r] of results.entries()) {
 //      function loadFile(path: string): Result<string, LoadError>
 //    Then handle each error variant in the caller, using assertNever for
 //    exhaustiveness.
+type LoadError = { kind: "not-found" } | { kind: "permission"; user: string };
+
+function loadFile(path: string): Result<string, LoadError> {
+  if (path === "missing.txt") {
+    return { ok: false, error: { kind: "not-found" } };
+  }
+  if (path === "secret.txt") {
+    return { ok: false, error: { kind: "permission", user: "Morgan" } };
+  }
+  return { ok: true, value: `contents of ${path}` };
+}
+
+function describeLoad(path: string): string {
+  const result = loadFile(path);
+  if (result.ok) {
+    return `loaded ${path}: ${result.value}`;
+  }
+  switch (result.error.kind) {
+    case "not-found":
+      return `${path} does not exist`;
+    case "permission":
+      return `${path} not readable by ${result.error.user}`;
+    default:
+      return assertNever(result.error);
+  }
+}
+
+console.log(`\n${describeLoad("readme.txt")}`);
+console.log(describeLoad("missing.txt"));
+console.log(describeLoad("secret.txt"));
 
 console.log("\n--- Lesson 03 complete --- error handling");
