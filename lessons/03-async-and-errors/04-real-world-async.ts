@@ -439,10 +439,60 @@ try {
 //
 // 4. Write `retryWithJitter` — like the retry function in section 6 but add
 //    a random 0–50ms jitter to each backoff delay (helps avoid thundering herds).
+async function retryWithJitter<T>(
+  operation: () => Promise<T>,
+  attempts = 3,
+  baseDelayMs = 100,
+): Promise<T> {
+  let lastError: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await operation();
+    } catch (err) {
+      lastError = err;
+      if (i < attempts - 1) {
+        const wait = baseDelayMs * 2 ** i + Math.random() * 50; // 100ms, 200ms, 400ms...
+        console.log(`  attempt ${i + 1} failed, retrying in ${wait}ms`);
+        await delay(wait);
+      }
+    }
+  }
+  throw new Error("retry: all attempts failed", { cause: lastError });
+}
+
+// Demo: succeeds on the 3rd try.
+calls = 0;
+
+console.log("\n=== retry ===");
+const retryResultJitter = await retryWithJitter(flaky, 5);
+console.log(retryResultJitter);
 //
 // 5. (Bonus) Write an async generator `paginated<T>(fetchPage: (page: number)
 //    => Promise<T[]>, totalPages: number)` that yields items from each page in
 //    order. Consume it with for await and log every item.
+// Simulate a paginated API — each call returns one page of results
+async function fetchPage(page: number): Promise<string[]> {
+  await delay(50); // simulate network latency
+  return [`page${page}-item1`, `page${page}-item2`, `page${page}-item3`];
+}
+
+// The async generator — fetches pages in order, yields items one at a time
+async function* paginated<T>(
+  fetchPage: (page: number) => Promise<T[]>,
+  totalPages: number,
+): AsyncGenerator<T> {
+  for (let page = 0; page < totalPages; page++) {
+    const items = await fetchPage(page);
+    for (const item of items) {
+      yield item;
+    }
+  }
+}
+
+// Consume it
+for await (const item of paginated(fetchPage, 3)) {
+  console.log(item);
+}
 
 console.log("\n--- Lesson 04 complete --- real-world async ---");
 console.log("\n🎉 Week 4 complete! Next up: project 01 — CLI tool.");
