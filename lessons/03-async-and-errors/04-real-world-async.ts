@@ -182,11 +182,7 @@ console.log(`cancellableWork: ${result}`);
 // You build this yourself — it's only ~15 lines and the libraries that wrap it
 // (p-retry, async-retry) don't add much.
 
-async function retry<T>(
-  operation: () => Promise<T>,
-  attempts = 3,
-  baseDelayMs = 100,
-): Promise<T> {
+async function retry<T>(operation: () => Promise<T>, attempts = 3, baseDelayMs = 100): Promise<T> {
   let lastError: unknown;
   for (let i = 0; i < attempts; i++) {
     try {
@@ -267,29 +263,29 @@ console.log(`results: ${poolResults} in ${Date.now() - start}ms`);
 
 // Uncomment to try it (requires internet):
 //
-// const response = await fetch("https://api.github.com/repos/microsoft/typescript");
-// if (!response.ok) {
-//   // fetch ONLY rejects on network failure — HTTP errors (404, 500) are NOT thrown.
-//   // You must check response.ok yourself. This is a famous gotcha.
-//   throw new Error(`HTTP ${response.status}`);
-// }
-// const data = await response.json() as { stargazers_count: number; name: string };
-// console.log(`${data.name}: ${data.stargazers_count} stars`);
+const response = await fetch("https://api.github.com/repos/microsoft/typescript");
+if (!response.ok) {
+  // fetch ONLY rejects on network failure — HTTP errors (404, 500) are NOT thrown.
+  // You must check response.ok yourself. This is a famous gotcha.
+  throw new Error(`HTTP ${response.status}`);
+}
+const data = (await response.json()) as { stargazers_count: number; name: string };
+console.log(`${data.name}: ${data.stargazers_count} stars`);
 
 // Note the cast on `response.json()` — it returns `Promise<any>`, so you should
 // validate the shape at runtime (Zod is the standard tool, covered in the CLI project).
 
 // fetch + AbortController + timeout, the production pattern:
 //
-// async function fetchWithTimeout(url: string, ms: number): Promise<Response> {
-//   const ac = new AbortController();
-//   const timer = setTimeout(() => ac.abort(), ms);
-//   try {
-//     return await fetch(url, { signal: ac.signal });
-//   } finally {
-//     clearTimeout(timer);
-//   }
-// }
+async function fetchWithTimeout(url: string, ms: number): Promise<Response> {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), ms);
+  try {
+    return await fetch(url, { signal: ac.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 // =============================================================================
 // 9. ASYNC ITERATORS — for await...of
@@ -348,13 +344,98 @@ console.log("  liftoff");
 //    a fake fetch (just returns `delay(100).then(() => url.toUpperCase())`).
 //    First do it with Promise.all, then with the `pool` function from section 7.
 //    Compare the timings for 10 URLs with limit 3.
+const fakeFetch = async (url: string) => delay(100).then(() => url.toUpperCase());
+
+async function fetchAllInParallel(urls: string[]): Promise<string[]> {
+  return await Promise.all(urls.map(fakeFetch));
+}
+
+const urls: string[] = [
+  "1.com",
+  "2.com",
+  "3.com",
+  "4.com",
+  "5.com",
+  "6.com",
+  "7.com",
+  "8.com",
+  "9.com",
+  "10.com",
+];
+
+const runParallel = async (start: number) => {
+  const results = await fetchAllInParallel(urls);
+  console.log(`Time taken for parallel: ${Date.now() - start}`);
+  return results;
+};
+
+const runPool = async (start: number, limit: number) => {
+  const results = await pool(urls, limit, fakeFetch);
+  console.log(`Time taken for pool: ${Date.now() - start}`);
+  return results;
+};
+
+const start1 = Date.now();
+const resultsParallel = await fetchAllInParallel(urls);
+console.log(`Parallel: ${Date.now() - start1}ms`);
+
+const start2 = Date.now();
+const resultsPool = await pool(urls, 3, fakeFetch);
+console.log(`Pool (limit 3): ${Date.now() - start2}ms`);
 //
 // 2. Write `sleepThenSay(ms: number, msg: string)` that uses delay and logs.
 //    Then race two of them with different ms — verify the faster one wins.
+async function sleepThenSay(ms: number, msg: string): Promise<void> {
+  await delay(ms);
+  console.log(msg);
+}
+
+const fastSpeaker = async () => sleepThenSay(20, "I am the fast speaker");
+const slowSpeaker = async () => sleepThenSay(50, "I am the slow speaker");
+
+await Promise.race([fastSpeaker(), slowSpeaker()]);
 //
 // 3. Implement `withTimeout` (section 3) using AbortController instead of
 //    Promise.race. Hint: schedule ac.abort(...) in a setTimeout, pass the
 //    signal into a delay-based simulation, and handle the AbortError.
+// function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+//   const timeout = delay(ms).then(() => {
+//     throw new Error(`Timed out after ${ms}ms`);
+//   });
+//   return Promise.race([promise, timeout]);
+// }
+
+// try {
+//   await withTimeout(slow(), 200); // slow() takes 500ms, will time out
+// } catch (err) {
+//   if (err instanceof Error) console.log(`\ntimeout: ${err.message}`);
+// }
+
+// const onTime = await withTimeout(fast(), 200);
+// console.log(`onTime: ${onTime}`);
+async function withTimeout2<T>(
+  operation: (signal: AbortSignal) => Promise<T>,
+  ms: number,
+): Promise<T> {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(new Error(`Timed out after ${ms}ms`)), ms);
+  try {
+    return await operation(ac.signal);
+  } finally {
+    clearTimeout(timer); // clean up if operation finishes before timeout
+  }
+}
+
+const delaySimulation = async (signal: AbortSignal): Promise<string> => {
+  await delay(500, undefined, { signal });
+  return "Promise resolved";
+};
+
+try {
+  await withTimeout2(delaySimulation, 200);
+} catch (err) {
+  if (err instanceof Error) console.log(`\nsimulation cancelled: ${err.message}`);
+}
 //
 // 4. Write `retryWithJitter` — like the retry function in section 6 but add
 //    a random 0–50ms jitter to each backoff delay (helps avoid thundering herds).
