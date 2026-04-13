@@ -1,0 +1,38 @@
+[
+  {
+    "deviceId": "sensor-001",
+    "timestamp": "2026-04-10T08:15:30Z",
+    "metric": "temperature",
+    "value": 21.4
+  },
+  {
+    "deviceId": "sensor-001",
+    "timestamp": "2026-04-10T08:15:30Z",
+    "metric": "humidity",
+    "value": 58.2
+  },
+  {
+    "deviceId": "sensor-002",
+    "timestamp": "2026-04-10T08:16:00Z",
+    "metric": "pressure",
+    "value": 1013.25
+  },
+  {
+    "deviceId": "sensor-003",
+    "timestamp": "2026-04-10T08:16:15Z",
+    "metric": "temperature",
+    "value": -12.8
+  },
+  {
+    "deviceId": "sensor-004",
+    "timestamp": "2026-04-10T08:16:45Z",
+    "metric": "temperature",
+    "value": 999.9
+  },
+  {
+    "deviceId": "sensor-002",
+    "timestamp": "2026-04-10T08:17:00Z",
+    "metric": "humidity",
+    "value": 0
+  }
+]
