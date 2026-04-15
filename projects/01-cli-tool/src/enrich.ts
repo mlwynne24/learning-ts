@@ -1,0 +1,69 @@
+import { type SensorReading, type EnrichedReading } from "./types.js";
+import { setTimeout as delay } from "node:timers/promises";
+
+class ApiError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+function randomChoice<T>(items: readonly T[]): T {
+  return items[Math.floor(Math.random() * items.length)]!;
+}
+
+const deviceNames = ["Device A", "Device B", "Device C", "Device D"] as const;
+type DeviceName = (typeof deviceNames)[number];
+
+const locations = ["Location A", "Location B", "Location C"] as const;
+type Location = (typeof locations)[number];
+
+async function withAbort<T>(
+  operation: (signal: AbortSignal) => Promise<T>,
+  ms: number,
+): Promise<T> {
+  const ac = new AbortController();
+  if (Math.random() < 0.1) {
+    ac.abort(new ApiError("10% failure error"));
+  }
+  const timer = setTimeout(() => ac.abort(new Error(`Timed out after ${ms}ms`)), ms);
+  try {
+    return await operation(ac.signal);
+  } finally {
+    clearTimeout(timer); // clean up if operation finishes before timeout
+  }
+}
+
+function getApiCallback(
+  reading: SensorReading,
+  delayMs: number,
+): (signal: AbortSignal) => Promise<EnrichedReading> {
+  return async (signal: AbortSignal) => {
+    await delay(delayMs, undefined, { signal });
+    return {
+      ...reading,
+      deviceName: randomChoice(deviceNames),
+      location: randomChoice(locations),
+    };
+  };
+}
+
+function getRandomDelay(delayRangeMs: [number, number]): number {
+  const [min, max] = delayRangeMs;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+async function enrichReading(
+  reading: SensorReading,
+  timeout: number = 250,
+  delayRangeMs: [number, number] = [50, 300],
+): Promise<EnrichedReading> {
+  try {
+    const randomDelay = getRandomDelay(delayRangeMs);
+    const apiCallback = getApiCallback(reading, randomDelay);
+    const result = await withAbort(apiCallback, timeout);
+    return result;
+  } catch (err) {
+    const cause = err instanceof Error ? err : new Error(String(err));
+    throw new Error("Error generating response from API", { cause });
+  }
+}
