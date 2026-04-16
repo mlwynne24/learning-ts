@@ -3,7 +3,8 @@ import { parseFile } from "./parse.js";
 import { validateSensorReading } from "./validate.js";
 import { enrichReading, pool } from "./enrich.js";
 import { generateReport } from "./report.js";
-import { write, writeFile, writeFileSync } from "node:fs";
+import { writeFileSync, mkdirSync } from "node:fs";
+import path from "path";
 
 type Config = {
   filePath: string;
@@ -52,6 +53,14 @@ function parseArgs(): Config {
   };
 }
 
+function writeToTextFile(outputDir: string, content: string): void {
+  const now = new Date();
+  const fileName = `${now.toISOString()}.txt`;
+  const outputPath = path.join(outputDir, fileName);
+  mkdirSync(outputPath, { recursive: true });
+  writeFileSync(outputPath, content);
+}
+
 async function main(): Promise<string | void> {
   try {
     const config: Config = parseArgs();
@@ -78,7 +87,7 @@ async function main(): Promise<string | void> {
       case "stdout":
         return report;
       case "file":
-        writeFileSync(`./outputs/${Date.now()}.txt`, report);
+        writeToTextFile("./outputs", report);
     }
   } catch (err) {
     if (err instanceof Error) {

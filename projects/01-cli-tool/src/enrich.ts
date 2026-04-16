@@ -13,10 +13,8 @@ function randomChoice<T>(items: readonly T[]): T {
 }
 
 const deviceNames = ["Device A", "Device B", "Device C", "Device D"] as const;
-type DeviceName = (typeof deviceNames)[number];
 
 const locations = ["Location A", "Location B", "Location C"] as const;
-type Location = (typeof locations)[number];
 
 async function withTimeout<T>(
   operation: (signal: AbortSignal) => Promise<T>,
