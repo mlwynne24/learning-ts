@@ -1,13 +1,8 @@
-import { SensorReading, type SensorReading as SR } from "./types.js";
+import { SensorReading, type SensorReading as SR, type Result } from "./types.js";
 
-export type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
-
-async function validateSensorReading(
-  sensorReading: unknown,
-  object: typeof SensorReading,
-): Promise<Result<SR>> {
+export function validateSensorReading(sensorReading: unknown): Result<SR> {
   try {
-    const result = await object.parse(sensorReading);
+    const result = SensorReading.parse(sensorReading);
     return { ok: true, value: result };
   } catch (err) {
     const cause = err instanceof Error ? err : new Error(String(err));

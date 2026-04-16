@@ -1,5 +1,6 @@
 import { type SensorReading, type EnrichedReading } from "./types.js";
 import { setTimeout as delay } from "node:timers/promises";
+import { type Result } from "./types.js";
 
 class ApiError extends Error {
   constructor(message: string) {
@@ -52,23 +53,23 @@ function getRandomDelay(delayRangeMs: [number, number]): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-async function enrichReading(
+export async function enrichReading(
   reading: SensorReading,
   timeout: number = 250,
   delayRangeMs: [number, number] = [50, 300],
-): Promise<EnrichedReading> {
+): Promise<Result<EnrichedReading>> {
   try {
     const randomDelay = getRandomDelay(delayRangeMs);
     const apiCallback = getApiCallback(reading, randomDelay);
     const result = await withTimeout(apiCallback, timeout);
-    return result;
+    return { ok: true, value: result };
   } catch (err) {
     const cause = err instanceof Error ? err : new Error(String(err));
-    throw new Error("Error generating response from API", { cause });
+    return { ok: false, error: new Error("Error generating response from API", { cause }) };
   }
 }
 
-async function pool<T, R>(
+export async function pool<T, R>(
   items: T[],
   limit: number,
   worker: (item: T) => Promise<R>,

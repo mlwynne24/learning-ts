@@ -1,43 +1,50 @@
 import path from "path";
 import { EnrichedReading, type SensorReading } from "./types.js";
-import { type Result } from "./validate.js";
+import { type Result, type SensorReading as SR, type EnrichedReading as ER } from "./types.js";
 
-function formatErrorRow(errors: string[]): string[] {
-  return errors.map((r, i) => `Row ${i}: ${r}`);
+function getFormattedErrors(results: Result<SR | ER>[]): string[] {
+  const errorCause = (e: Error): string => (e.cause ? ` - ${e.cause}` : "");
+  let formattedErrors = [];
+  for (let i = 0; i < results.length; i++) {
+    let result = results[i];
+    if (!result.ok) {
+      let e = result.error;
+      let formattedError = `Row ${i}: ${e.name} - ${e.message}${errorCause(e)}`;
+      formattedErrors.push(formattedError);
+    }
+  }
+  return formattedErrors;
 }
 
-function generateReport(
+export function generateReport(
   filePath: string,
   validateResults: Result<SensorReading>[],
-  enrichResults: PromiseSettledResult<EnrichedReading>[],
+  enrichResults: Result<EnrichedReading>[],
 ): string {
   const fileName = path.basename(filePath);
   const numReadings = validateResults.length;
   const invalidResults = validateResults.filter((r) => !r.ok);
   const numInvalid = invalidResults.length;
   const numValid = numReadings - numInvalid;
-  const enrichFailedResults = enrichResults.filter((r) => r.status === "rejected");
+  const enrichFailedResults = enrichResults.filter((r) => !r.ok);
   const numEnrichFailed = enrichFailedResults.length;
   const numEnriched = enrichResults.length - numEnrichFailed;
+  const validationErrorsFormatted = getFormattedErrors(validateResults);
+  const enrichmentFailuresFormatted = getFormattedErrors(enrichFailedResults);
 
-  const validationErrors = invalidResults.map((r) => r.error.message);
-  const enrichmentFailures = enrichFailedResults.map((r) => r.reason);
-
-  const validationErrorsFormatted = formatErrorRow(validationErrors);
-  const enrichmentFailuresFormatted = formatErrorRow(enrichmentFailures);
-
-  return [
+  let report = [
     "=== Data Pipeline Report ===",
     `Input:         ${fileName} (${numReadings} rows)`,
     `Valid:         ${numValid}`,
     `Invalid:       ${numInvalid}`,
     `Enriched:      ${numEnriched}`,
     `Enrich failed: ${numEnrichFailed}`,
-    "",
-    "=== Validation errors ===",
-    `${validationErrorsFormatted.join("\n")}`,
-    "",
-    "=== Enrichment failures ===",
-    `${enrichmentFailuresFormatted.join("\n")}`,
-  ].join("\n");
+  ];
+  if (!(validationErrorsFormatted.length === 0)) {
+    report.push("\n=== Validation errors ===", `${validationErrorsFormatted.join("\n")}`);
+  }
+  if (!(enrichmentFailuresFormatted.length === 0)) {
+    report.push("\n=== Enrichment failures ===", `${enrichmentFailuresFormatted.join("\n")}`);
+  }
+  return report.join("\n");
 }

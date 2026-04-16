@@ -1,9 +1,13 @@
 import * as fs from "fs/promises";
 import path from "path";
 
-function parseJson(json: string): Promise<object> {
+function parseJson(json: string): object[] {
   try {
-    return JSON.parse(json);
+    const content = JSON.parse(json);
+    if (!(content instanceof Array)) {
+      throw new Error("JSON content must be an array");
+    }
+    return content;
   } catch (err) {
     const cause = err instanceof Error ? err : new Error(String(err));
     throw new Error("Error parsing JSON content", { cause });
@@ -33,7 +37,7 @@ function parseCsv(csv: string): Record<string, string>[] {
   }
 }
 
-async function parseFile(filePath: string): Promise<unknown> {
+export async function parseFile(filePath: string): Promise<object[]> {
   const suffix = path.extname(filePath);
   const content = await fs.readFile(filePath, "utf-8");
   switch (suffix) {

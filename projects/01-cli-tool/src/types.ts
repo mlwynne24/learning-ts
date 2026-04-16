@@ -16,3 +16,5 @@ export const EnrichedReading = z.object({
 });
 
 export type EnrichedReading = z.infer<typeof EnrichedReading>;
+
+export type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
