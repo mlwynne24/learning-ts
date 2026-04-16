@@ -55,8 +55,8 @@ function getRandomDelay(delayRangeMs: [number, number]): number {
 
 export async function enrichReading(
   reading: SensorReading,
-  timeout: number = 250,
-  delayRangeMs: [number, number] = [50, 300],
+  timeout: number,
+  delayRangeMs: [number, number] = [300, 2500],
 ): Promise<Result<EnrichedReading>> {
   try {
     const randomDelay = getRandomDelay(delayRangeMs);
