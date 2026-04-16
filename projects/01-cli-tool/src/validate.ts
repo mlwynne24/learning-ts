@@ -1,20 +1,11 @@
-import {
-  SensorReading,
-  EnrichedReading,
-  type SensorReading as SR,
-  type EnrichedReading as ER,
-} from "./types.js";
+import { SensorReading, type SensorReading as SR } from "./types.js";
 
-type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
-
-type Reading = SR | ER;
-
-type ReadingValidator = typeof SensorReading | typeof EnrichedReading;
+export type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
 
 async function validateSensorReading(
-  sensorReading: object,
-  object: ReadingValidator,
-): Promise<Result<Reading>> {
+  sensorReading: unknown,
+  object: typeof SensorReading,
+): Promise<Result<SR>> {
   try {
     const result = await object.parse(sensorReading);
     return { ok: true, value: result };
