@@ -73,6 +73,7 @@ export async function pool<T, R>(
   items: T[],
   limit: number,
   worker: (item: T) => Promise<R>,
+  ...args: string[]
 ): Promise<R[]> {
   const results: R[] = new Array<R>(items.length);
   let cursor = 0;

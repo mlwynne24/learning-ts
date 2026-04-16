@@ -28,11 +28,14 @@ function parseArgs(): Config {
 
   const filePath = positionals[0];
   if (!filePath) {
-    console.error("Usage: datapipe <file> [options]");
-    process.exit(1);
+    throw new Error("Usage: datapipe <file> [options]");
   }
   const concurrency = Number(values.concurrency);
   const timeout = Number(values.timeout);
+
+  // if (!(values.format in ["csv", "json"])) {
+  //   throw new Error("--format must be 'csv' or 'json'");
+  // }
 
   return {
     filePath: filePath,
@@ -47,7 +50,7 @@ function parseArgs(): Config {
 async function main(): Promise<void> {
   try {
     const config: Config = parseArgs();
-    const fileContent: object[] = await parseFile(config.filePath);
+    const fileContent: object[] = await parseFile(config.filePath, config.format);
     const sensorReadings = fileContent.map(validateSensorReading);
     const validSensorReadings = sensorReadings.filter((r) => r.ok).map((r) => r.value);
     const enrichResults = await pool(validSensorReadings, config.concurrency, enrichReading);
