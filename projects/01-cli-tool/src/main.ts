@@ -3,6 +3,7 @@ import { parseFile } from "./parse.js";
 import { validateSensorReading } from "./validate.js";
 import { enrichReading, pool } from "./enrich.js";
 import { generateReport } from "./report.js";
+import { write, writeFile, writeFileSync } from "node:fs";
 
 type Config = {
   filePath: string;
@@ -32,10 +33,13 @@ function parseArgs(): Config {
   }
   const concurrency = Number(values.concurrency);
   const timeout = Number(values.timeout);
-
   const validFormats = ["csv", "json", "auto"];
   if (!validFormats.includes(values.format!)) {
     throw new Error(`--format must be one of: ${validFormats.join(", ")}`);
+  }
+  const validOutputs = ["stdout", "file"];
+  if (!validOutputs.includes(values.output)) {
+    throw new Error(`--output must be one of: ${validOutputs.join(", ")}`);
   }
 
   return {
@@ -48,19 +52,22 @@ function parseArgs(): Config {
   };
 }
 
-async function main(): Promise<void> {
+async function main(): Promise<string | void> {
   try {
     const config: Config = parseArgs();
     const fileContent: object[] = await parseFile(config.filePath, config.format);
     const sensorReadings = fileContent.map(validateSensorReading);
     const validSensorReadings = sensorReadings.filter((r) => r.ok).map((r) => r.value);
-    const enrichResults = await pool(
-      validSensorReadings,
-      config.concurrency,
-      (reading) => enrichReading(reading, config.timeout),
+    const enrichResults = await pool(validSensorReadings, config.concurrency, (reading) =>
+      enrichReading(reading, config.timeout),
     );
     const report = generateReport(config.filePath, sensorReadings, enrichResults);
-    console.log(report);
+    switch (config.output) {
+      case "stdout":
+        return report;
+      case "file":
+        writeFileSync(`./outputs/${Date.now()}.txt`, report);
+    }
   } catch (err) {
     if (err instanceof Error) {
       console.log(`Error: ${err.message}`);
