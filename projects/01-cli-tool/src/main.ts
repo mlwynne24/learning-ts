@@ -91,9 +91,11 @@ async function main(): Promise<string | void> {
     const report = generateReport(config.filePath, sensorReadings, enrichResults);
     switch (config.output) {
       case "stdout":
-        return report;
+        console.log(report);
+        break;
       case "file":
         writeToTextFile("./projects/01-cli-tool/outputs", report);
+        break;
     }
   } catch (err) {
     if (err instanceof Error) {
