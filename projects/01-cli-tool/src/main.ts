@@ -33,9 +33,10 @@ function parseArgs(): Config {
   const concurrency = Number(values.concurrency);
   const timeout = Number(values.timeout);
 
-  // if (!(values.format in ["csv", "json"])) {
-  //   throw new Error("--format must be 'csv' or 'json'");
-  // }
+  const validFormats = ["csv", "json", "auto"];
+  if (!validFormats.includes(values.format!)) {
+    throw new Error(`--format must be one of: ${validFormats.join(", ")}`);
+  }
 
   return {
     filePath: filePath,
@@ -53,7 +54,11 @@ async function main(): Promise<void> {
     const fileContent: object[] = await parseFile(config.filePath, config.format);
     const sensorReadings = fileContent.map(validateSensorReading);
     const validSensorReadings = sensorReadings.filter((r) => r.ok).map((r) => r.value);
-    const enrichResults = await pool(validSensorReadings, config.concurrency, enrichReading);
+    const enrichResults = await pool(
+      validSensorReadings,
+      config.concurrency,
+      (reading) => enrichReading(reading, config.timeout),
+    );
     const report = generateReport(config.filePath, sensorReadings, enrichResults);
     console.log(report);
   } catch (err) {
