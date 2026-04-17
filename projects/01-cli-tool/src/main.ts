@@ -4,6 +4,7 @@ import { validateSensorReading } from "./validate.js";
 import { enrichReading, pool } from "./enrich.js";
 import { generateReport } from "./report.js";
 import { writeFileSync, mkdirSync } from "node:fs";
+import { type Result, type SensorReading as SR } from "./types.js";
 import path from "path";
 
 type Config = {
@@ -63,6 +64,10 @@ function writeToTextFile(outputDir: string, content: string): void {
   console.log(`Report written to: ${outputPath}`);
 }
 
+const getNestedCauseFromResult = (r: Result<SR>): string => {
+  return !r.ok && r.error.cause instanceof Error ? ` (${r.error.cause.message})` : "";
+};
+
 async function main(): Promise<string | void> {
   try {
     const config: Config = parseArgs();
@@ -70,10 +75,7 @@ async function main(): Promise<string | void> {
     const sensorReadings = fileContent.map((row, i) => {
       const result = validateSensorReading(row);
       if (config.verbose) {
-        const cause =
-          !result.ok && result.error.cause instanceof Error
-            ? ` (${result.error.cause.message})`
-            : "";
+        const cause = getNestedCauseFromResult(result);
         const status = result.ok ? "valid" : `INVALID: ${result.error.message}${cause}`;
         console.log(`[verbose] Row ${i}: ${status}`);
       }
@@ -83,10 +85,7 @@ async function main(): Promise<string | void> {
     const enrichResults = await pool(validSensorReadings, config.concurrency, async (reading) => {
       const result = await enrichReading(reading, config.timeout);
       if (config.verbose) {
-        const cause =
-          !result.ok && result.error.cause instanceof Error
-            ? ` (${result.error.cause.message})`
-            : "";
+        const cause = getNestedCauseFromResult(result);
         const status = result.ok ? "enriched" : `FAILED: ${result.error.message}${cause}`;
         console.log(`[verbose] ${reading.deviceId} @ ${reading.timestamp}: ${status}`);
       }
