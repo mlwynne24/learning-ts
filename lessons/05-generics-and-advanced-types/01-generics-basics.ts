@@ -275,9 +275,7 @@ function groupBy<T, K extends string | number>(arr: T[], keyFn: (item: T) => K):
   let record = {} as Record<K, T[]>;
   for (const item of arr) {
     const key = keyFn(item);
-    if (!(key in record)) {
-      record[key] = [];
-    }
+    record[key] ??= [];
     record[key].push(item);
   }
   return record;
@@ -288,6 +286,15 @@ console.log(groupBy([{ age: 1 }, { age: 2 }, { age: 1 }], (x) => x.age));
 // 4. Write `pluck<T, K extends keyof T>(arr: T[], key: K): T[K][]` that returns
 //    an array of the given property from each item.
 //    Test it with: pluck([{name:"a"},{name:"b"}], "name")  // => ["a", "b"]
+function pluck<T, K extends keyof T>(arr: T[], key: K): T[K][] {
+  const result = [] as T[K][];
+  for (const item of arr) {
+    result.push(item[key]);
+  }
+  return result;
+}
+
+console.log(pluck([{ name: "a" }, { name: "b" }], "name"));
 //
 // 5. (Bonus) Write `memoize<A, R>(fn: (arg: A) => R): (arg: A) => R` that caches
 //    results keyed by JSON.stringify(arg). Verify it only calls fn once per
