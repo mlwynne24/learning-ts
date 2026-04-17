@@ -70,7 +70,11 @@ async function main(): Promise<string | void> {
     const sensorReadings = fileContent.map((row, i) => {
       const result = validateSensorReading(row);
       if (config.verbose) {
-        const status = result.ok ? "valid" : `INVALID: ${result.error.message}`;
+        const cause =
+          !result.ok && result.error.cause instanceof Error
+            ? ` (${result.error.cause.message})`
+            : "";
+        const status = result.ok ? "valid" : `INVALID: ${result.error.message}${cause}`;
         console.log(`[verbose] Row ${i}: ${status}`);
       }
       return result;
