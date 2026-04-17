@@ -56,10 +56,11 @@ function parseArgs(): Config {
 function writeToTextFile(outputDir: string, content: string): void {
   const now = new Date();
   const stamp = now.toISOString().slice(0, 19).replaceAll(/[-:]/g, "").replace("T", "_");
-  const fileName = `${stamp}.txt`;
+  const fileName = `report-${stamp}.txt`;
   const outputPath = path.join(outputDir, fileName);
   mkdirSync(outputDir, { recursive: true });
   writeFileSync(outputPath, content);
+  console.log(`Report written to: ${outputPath}`);
 }
 
 async function main(): Promise<string | void> {
@@ -78,7 +79,10 @@ async function main(): Promise<string | void> {
     const enrichResults = await pool(validSensorReadings, config.concurrency, async (reading) => {
       const result = await enrichReading(reading, config.timeout);
       if (config.verbose) {
-        const cause = !result.ok && result.error.cause instanceof Error ? ` (${result.error.cause.message})` : "";
+        const cause =
+          !result.ok && result.error.cause instanceof Error
+            ? ` (${result.error.cause.message})`
+            : "";
         const status = result.ok ? "enriched" : `FAILED: ${result.error.message}${cause}`;
         console.log(`[verbose] ${reading.deviceId} @ ${reading.timestamp}: ${status}`);
       }
@@ -89,7 +93,7 @@ async function main(): Promise<string | void> {
       case "stdout":
         return report;
       case "file":
-        writeToTextFile("./outputs", report);
+        writeToTextFile("./projects/01-cli-tool/outputs", report);
     }
   } catch (err) {
     if (err instanceof Error) {

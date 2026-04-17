@@ -3,3 +3,6 @@ dist/
 *.js.map
 .env
 .DS_Store
+
+# Project outputs
+projects/**/outputs/**
