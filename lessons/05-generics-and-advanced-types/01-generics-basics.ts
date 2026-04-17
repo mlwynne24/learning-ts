@@ -287,11 +287,7 @@ console.log(groupBy([{ age: 1 }, { age: 2 }, { age: 1 }], (x) => x.age));
 //    an array of the given property from each item.
 //    Test it with: pluck([{name:"a"},{name:"b"}], "name")  // => ["a", "b"]
 function pluck<T, K extends keyof T>(arr: T[], key: K): T[K][] {
-  const result = [] as T[K][];
-  for (const item of arr) {
-    result.push(item[key]);
-  }
-  return result;
+  return arr.map((item) => item[key]);
 }
 
 console.log(pluck([{ name: "a" }, { name: "b" }], "name"));
