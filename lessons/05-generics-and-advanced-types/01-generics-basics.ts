@@ -258,7 +258,7 @@ console.log(last(idObjectArray));
 //    Hint: use Math.min(a.length, b.length) in a for loop.
 function zip<A, B>(a: A[], b: B[]): [A, B][] {
   const result: [A, B][] = [];
-  for (let i = 0; Math.min(a.length, b.length); i++) {
+  for (let i = 0; i < Math.min(a.length, b.length); i++) {
     result.push([a[i], b[i]]);
   }
   return result;
@@ -271,7 +271,19 @@ console.log(zip(a, b));
 // 3. Write `groupBy<T, K extends string | number>(arr: T[], keyFn: (item: T) => K):
 //    Record<K, T[]>` that groups items by the key returned from keyFn.
 //    Test it with: groupBy([{age: 1}, {age: 2}, {age: 1}], x => x.age)
+function groupBy<T, K extends string | number>(arr: T[], keyFn: (item: T) => K): Record<K, T[]> {
+  let record = {} as Record<K, T[]>;
+  for (const item of arr) {
+    const key = keyFn(item);
+    if (!(key in record)) {
+      record[key] = [];
+    }
+    record[key].push(item);
+  }
+  return record;
+}
 
+console.log(groupBy([{ age: 1 }, { age: 2 }, { age: 1 }], (x) => x.age));
 //
 // 4. Write `pluck<T, K extends keyof T>(arr: T[], key: K): T[K][]` that returns
 //    an array of the given property from each item.
