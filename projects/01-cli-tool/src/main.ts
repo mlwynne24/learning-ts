@@ -57,7 +57,7 @@ function writeToTextFile(outputDir: string, content: string): void {
   const now = new Date();
   const fileName = `${now.toISOString()}.txt`;
   const outputPath = path.join(outputDir, fileName);
-  mkdirSync(outputPath, { recursive: true });
+  mkdirSync(outputDir, { recursive: true });
   writeFileSync(outputPath, content);
 }
 
@@ -77,7 +77,8 @@ async function main(): Promise<string | void> {
     const enrichResults = await pool(validSensorReadings, config.concurrency, async (reading) => {
       const result = await enrichReading(reading, config.timeout);
       if (config.verbose) {
-        const status = result.ok ? "enriched" : `FAILED: ${result.error.message}`;
+        const cause = !result.ok && result.error.cause instanceof Error ? ` (${result.error.cause.message})` : "";
+        const status = result.ok ? "enriched" : `FAILED: ${result.error.message}${cause}`;
         console.log(`[verbose] ${reading.deviceId} @ ${reading.timestamp}: ${status}`);
       }
       return result;
