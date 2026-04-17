@@ -24,8 +24,11 @@ async function withTimeout<T>(
   const timer = setTimeout(() => ac.abort(new Error(`Timed out after ${ms}ms`)), ms);
   try {
     return await operation(ac.signal);
+  } catch (err) {
+    if (ac.signal.aborted) throw ac.signal.reason;
+    throw err;
   } finally {
-    clearTimeout(timer); // clean up if operation finishes before timeout
+    clearTimeout(timer);
   }
 }
 
