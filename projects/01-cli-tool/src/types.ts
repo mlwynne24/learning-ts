@@ -4,7 +4,7 @@ export const SensorReading = z.object({
   deviceId: z.string().min(1),
   timestamp: z.iso.datetime(),
   metric: z.enum(["temperature", "humidity", "pressure"]),
-  value: z.number().min(-100).max(1000),
+  value: z.coerce.number().min(-100).max(1000),
 });
 
 export type SensorReading = z.infer<typeof SensorReading>;
