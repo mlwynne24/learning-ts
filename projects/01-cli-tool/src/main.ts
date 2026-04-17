@@ -55,7 +55,8 @@ function parseArgs(): Config {
 
 function writeToTextFile(outputDir: string, content: string): void {
   const now = new Date();
-  const fileName = `${now.toISOString()}.txt`;
+  const stamp = now.toISOString().slice(0, 19).replaceAll(/[-:]/g, "").replace("T", "_");
+  const fileName = `${stamp}.txt`;
   const outputPath = path.join(outputDir, fileName);
   mkdirSync(outputDir, { recursive: true });
   writeFileSync(outputPath, content);
