@@ -39,9 +39,10 @@ function parseCsv(csv: string): Record<string, string>[] {
 
 export async function parseFile(filePath: string, format: string): Promise<object[]> {
   const suffix = path.extname(filePath);
-  // if (!(suffix.replace(".", "") === suffix)) {
-  //   throw new Error(`File extension ${suffix} does not match --format ${format}`)
-  // }
+  const extension = suffix.replace(".", "");
+  if (format !== "auto" && extension !== format) {
+    throw new Error(`File extension .${extension} does not match --format ${format}`);
+  }
   const content = await fs.readFile(filePath, "utf-8");
   switch (suffix) {
     case ".json":
