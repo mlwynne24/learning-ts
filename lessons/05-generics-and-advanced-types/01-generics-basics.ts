@@ -150,7 +150,7 @@ console.log(`\ngetProperty name: ${userName}, age: ${userAge}`);
 // TS would parse <T> as a JSX tag. The trailing comma disambiguates. In .ts
 // files you don't need it, but many codebases use it for consistency.
 
-const identity = <T,>(value: T): T => value;
+const identity = <T>(value: T): T => value;
 
 const num = identity(42); // number
 const str = identity("hi"); // string
@@ -240,14 +240,38 @@ console.log(`tapped: ${tapped.name}`);
 // =============================================================================
 // 1. Write a generic `last<T>(arr: T[]): T | undefined` that returns the last
 //    element. Test it with numbers, strings, and an array of { id: string }.
+const last = <T>(arr: T[]): T | undefined => {
+  return arr[arr.length - 1];
+};
+
+const numberArray: number[] = [1, 2, 3];
+console.log(last(numberArray));
+
+const stringArray: string[] = ["one", "two", "three"];
+console.log(last(stringArray));
+
+const idObjectArray: { id: string }[] = [{ id: "001" }, { id: "002" }, { id: "003" }];
+console.log(last(idObjectArray));
 //
 // 2. Write `zip<A, B>(a: A[], b: B[]): [A, B][]` — like Python's zip for two
 //    arrays. The result should stop at the shorter input's length.
 //    Hint: use Math.min(a.length, b.length) in a for loop.
+function zip<A, B>(a: A[], b: B[]): [A, B][] {
+  const result: [A, B][] = [];
+  for (let i = 0; Math.min(a.length, b.length); i++) {
+    result.push([a[i], b[i]]);
+  }
+  return result;
+}
+
+const a = [1, 2, 3, 4];
+const b = ["1", "2", "3"];
+console.log(zip(a, b));
 //
 // 3. Write `groupBy<T, K extends string | number>(arr: T[], keyFn: (item: T) => K):
 //    Record<K, T[]>` that groups items by the key returned from keyFn.
 //    Test it with: groupBy([{age: 1}, {age: 2}, {age: 1}], x => x.age)
+
 //
 // 4. Write `pluck<T, K extends keyof T>(arr: T[], key: K): T[K][]` that returns
 //    an array of the given property from each item.
