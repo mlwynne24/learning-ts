@@ -56,11 +56,23 @@ async function main(): Promise<string | void> {
   try {
     const config: Config = parseArgs();
     const fileContent: object[] = await parseFile(config.filePath, config.format);
-    const sensorReadings = fileContent.map(validateSensorReading);
+    const sensorReadings = fileContent.map((row, i) => {
+      const result = validateSensorReading(row);
+      if (config.verbose) {
+        const status = result.ok ? "valid" : `INVALID: ${result.error.message}`;
+        console.log(`[verbose] Row ${i}: ${status}`);
+      }
+      return result;
+    });
     const validSensorReadings = sensorReadings.filter((r) => r.ok).map((r) => r.value);
-    const enrichResults = await pool(validSensorReadings, config.concurrency, (reading) =>
-      enrichReading(reading, config.timeout),
-    );
+    const enrichResults = await pool(validSensorReadings, config.concurrency, async (reading) => {
+      const result = await enrichReading(reading, config.timeout);
+      if (config.verbose) {
+        const status = result.ok ? "enriched" : `FAILED: ${result.error.message}`;
+        console.log(`[verbose] ${reading.deviceId} @ ${reading.timestamp}: ${status}`);
+      }
+      return result;
+    });
     const report = generateReport(config.filePath, sensorReadings, enrichResults);
     switch (config.output) {
       case "stdout":
