@@ -1,2 +1,5 @@
 deviceId,timestamp,metric,value
 sensor-001,2026-04-10T08:16:00Z,humidity,-80
+sensor-002,2025-03-29,m/s,900
+sensor-009,2023-04-45T09:15:05Z,pressure,98
+sensor-010,2024-09-09T10:20:00Z,temperature,954
