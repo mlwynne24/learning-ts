@@ -299,5 +299,24 @@ console.log(pluck([{ name: "a" }, { name: "b" }], "name"));
 // 5. (Bonus) Write `memoize<A, R>(fn: (arg: A) => R): (arg: A) => R` that caches
 //    results keyed by JSON.stringify(arg). Verify it only calls fn once per
 //    unique input by logging from inside fn.
+function memoize<A, R>(fn: (arg: A) => R): (arg: A) => R {
+  const cache = new Map<string, R>();
+  return (arg) => {
+    const key = JSON.stringify(arg);
+    if (cache.has(key)) {
+      console.log(`${key} in cache :)`);
+      return cache.get(key)!;
+    }
+    console.log(`${key} not in cache. Caching!`);
+    const result = fn(arg);
+    cache.set(key, result);
+    return result;
+  };
+}
+
+const addTwo = memoize((n: number) => n + 2);
+
+console.log(addTwo(2));
+console.log(addTwo(2));
 
 console.log("\n--- Lesson 01 complete --- generics basics");
