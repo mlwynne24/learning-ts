@@ -331,7 +331,7 @@ class Queue<T> {
     this.arr.push(item);
   }
   dequeue(): T | undefined {
-    return this.arr.splice(0, 1)[0];
+    return this.arr.shift();
   }
   peek(): T | undefined {
     return this.arr[0];
@@ -358,7 +358,7 @@ interface Comparable<T> {
 class Money implements Comparable<Money> {
   constructor(private amount: number) {}
   compareTo(money: Money): number {
-    return money.amount - this.amount;
+    return this.amount - money.amount;
   }
 }
 
@@ -403,12 +403,17 @@ class LruCache<K, V> {
     private cache = new Map<K, V>(),
   ) {}
   get(item: K): V | undefined {
-    return this.cache.get(item);
+    const val = this.cache.get(item);
+    if (val !== undefined) {
+      this.cache.delete(item);
+      this.cache.set(item, val);
+    }
+    return val;
   }
   set(item: K, value: V): void {
     this.cache.set(item, value);
     if (this.cache.size > this.max) {
-      this.cache.delete(this.cache.keys().next() as K);
+      this.cache.delete(this.cache.keys().next().value as K);
     }
   }
 }
