@@ -170,7 +170,12 @@ const tasks = new IdRepository<Task>();
 tasks.save({ id: "t1", title: "Learn generics", done: true });
 tasks.save({ id: "t2", title: "Learn utility types", done: false });
 
-console.log(`\nall tasks: ${tasks.all().map((t) => t.title).join(", ")}`);
+console.log(
+  `\nall tasks: ${tasks
+    .all()
+    .map((t) => t.title)
+    .join(", ")}`,
+);
 console.log(`t1: ${tasks.findById("t1")?.title}`);
 
 // Try constructing IdRepository<{ title: string }> — TS errors because
@@ -317,20 +322,97 @@ events.emit("error", { message: "oops", code: 500 });
 // 1. Write a generic `Queue<T>` class with enqueue, dequeue, peek, and a `size`
 //    getter. Use a private array internally. Make dequeue return T | undefined.
 //    Test with Queue<number> and Queue<{ id: string; title: string }>.
+class Queue<T> {
+  private arr: T[] = [];
+  get size(): number {
+    return this.arr.length;
+  }
+  enqueue(item: T): void {
+    this.arr.push(item);
+  }
+  dequeue(): T | undefined {
+    return this.arr.splice(0, 1)[0];
+  }
+  peek(): T | undefined {
+    return this.arr[0];
+  }
+}
+
+const numberQueue: Queue<number> = new Queue();
+numberQueue.enqueue(6);
+numberQueue.enqueue(7);
+numberQueue.enqueue(8);
+console.log(numberQueue.size);
+console.log(numberQueue.dequeue());
+console.log(numberQueue.size);
+console.log(numberQueue.peek());
 //
 // 2. Define a generic interface `Comparable<T>` with a single method
 //    `compareTo(other: T): number` (negative, zero, or positive — like Java).
 //    Make a class `Money` that implements Comparable<Money> with an `amount`
 //    property, and sort an array of Money instances using arr.sort((a, b) => a.compareTo(b)).
+interface Comparable<T> {
+  compareTo(other: T): number;
+}
+
+class Money implements Comparable<Money> {
+  constructor(private amount: number) {}
+  compareTo(money: Money): number {
+    return money.amount - this.amount;
+  }
+}
+
+const moneys: Money[] = [new Money(5), new Money(7), new Money(3)];
+
+console.log(moneys.sort((a, b) => a.compareTo(b)));
 //
 // 3. Define `type ApiCall<TReq, TRes> = (req: TReq) => Promise<TRes>`. Write a
 //    `withLogging` higher-order function that takes an ApiCall and returns an
 //    ApiCall that logs the request and response but passes through the types.
 //    Hint: `function withLogging<TReq, TRes>(fn: ApiCall<TReq, TRes>): ApiCall<TReq, TRes>`.
+type ApiCall<TReq, TRes> = (req: TReq) => Promise<TRes>;
+
+function withLogging<TReq, TRes>(fn: ApiCall<TReq, TRes>): ApiCall<TReq, TRes> {
+  return async (req: TReq) => {
+    console.log(req);
+    const result = await fn(req);
+    console.log(result);
+    return result;
+  };
+}
+
+type User = { id: string; name: string };
+type enrichedUser = { id: string; name: string; email: string };
+const enrichUser = async (user: User): Promise<enrichedUser> => {
+  return {
+    ...user,
+    email: "test@test.com",
+  };
+};
+
+const testUser = { id: "001", name: "Morgan" };
+await withLogging(enrichUser)(testUser);
 //
 // 4. (Bonus) Write `class LruCache<K, V>` with get, set, and a `max` capacity.
 //    When set exceeds max, evict the least-recently-used key. Use Map for O(1)
 //    operations and rely on Map's insertion-order iteration.
 //    Signature: `new LruCache<string, number>(max: 3)`.
+class LruCache<K, V> {
+  constructor(
+    public readonly max: number,
+    private cache = new Map<K, V>(),
+  ) {}
+  get(item: K): V | undefined {
+    return this.cache.get(item);
+  }
+  set(item: K, value: V): void {
+    this.cache.set(item, value);
+    if (this.cache.size > this.max) {
+      this.cache.delete(this.cache.keys().next() as K);
+    }
+  }
+}
+
+const cache = new LruCache<string, number>(3);
 
 console.log("\n--- Lesson 02 complete --- generic types and classes");
