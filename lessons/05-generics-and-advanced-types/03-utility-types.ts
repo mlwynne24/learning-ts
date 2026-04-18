@@ -327,23 +327,64 @@ for (const [name, does, when] of reference) {
 //    - A type `UserWithoutId` that's everything except id (useful for
 //      "create" operations where the DB assigns the id)
 //    Use Pick and Omit.
+type UserCredentials = Pick<User, "email" | "password">;
+const userCredentials: UserCredentials = { email: "m@x.com", password: "xxx" };
+type UserPreview = Pick<User, "id" | "name">;
+const testUserPreview: UserPreview = { id: "001", name: "morgan" };
+type UserWithoutId = Omit<User, "id">;
+const { id: _id, ...rest } = fullUser;
+const testUserWithoutId: UserWithoutId = rest;
 //
 // 2. Define `type Settings = { theme?: "light" | "dark"; fontSize?: number; locale?: string }`.
 //    Write a function `applyDefaults(s: Partial<Settings>): Required<Settings>` that
 //    fills in any missing fields with defaults. Use the ?? operator.
+type Settings = { theme?: "light" | "dark"; fontSize?: number; locale?: string };
+
+function applyDefaults(s: Partial<Settings>): Required<Settings> {
+  return {
+    theme: s.theme ?? "light",
+    fontSize: s.fontSize ?? 12,
+    locale: s.locale ?? "en",
+  };
+}
+
+const userDefinedSettings: Settings = { locale: "en" };
+const userFullSettings: Settings = applyDefaults(userDefinedSettings);
+console.log(userFullSettings);
 //
 // 3. Given the union `type Action = "create" | "read" | "update" | "delete"`:
 //    - Derive `type ReadOnlyAction = Extract<Action, "read">` — verify it's just "read"
 //    - Derive `type MutatingAction = Exclude<Action, "read">`
 //    - Write a function `isMutating(a: Action): a is MutatingAction` using a type predicate.
+type Action = "create" | "read" | "update" | "delete";
+type ReadOnlyAction = Extract<Action, "read">;
+type MutatingAction = Exclude<Action, "read">;
+
+function isMutating(a: Action): a is MutatingAction {
+  return a !== "read";
+}
+
+console.log(isMutating("update"));
+console.log(isMutating("read"));
 //
 // 4. Write a generic `Wrapped<T>` type alias: if T is a Promise, use Awaited<T>;
 //    otherwise just T. For now, do it by hand using Awaited — in lesson 4 you'll
 //    learn conditional types and can express this generically.
+type Wrapped<T> = Awaited<T>;
 //
 // 5. (Bonus) Write `function pick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K>`.
 //    This is your own runtime version of Pick. Test it:
 //      pick({ a: 1, b: 2, c: 3 }, ["a", "c"])  // => { a: 1, c: 3 }
 //    Make sure the return type is narrowed — not just Record<string, unknown>.
+function pick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
+  const result = {} as Pick<T, K>;
+  for (const k of keys) {
+    const v = obj[k];
+    if (k !== undefined) {
+      result[k] = obj[k];
+    }
+  }
+  return result;
+}
 
 console.log("\n--- Lesson 03 complete --- utility types");
