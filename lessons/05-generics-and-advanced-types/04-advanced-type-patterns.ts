@@ -336,21 +336,41 @@ console.log(`\ntyped path: ${nm}, ${rl}`);
 // 1. Given `const LEVELS = ["debug", "info", "warn", "error"] as const`,
 //    derive `type LogLevel = (typeof LEVELS)[number]`. Write a function
 //    `log(level: LogLevel, msg: string)` and verify it rejects an unknown level.
+const LEVELS = ["debug", "info", "warn", "error"] as const;
+type LogLevel = (typeof LEVELS)[number];
+
+function log(level: LogLevel, msg: string): string {
+  return `[${level}] ${msg}`;
+}
 //
 // 2. Write `type Optional<T, K extends keyof T>` that makes ONLY the listed keys
 //    optional, leaving the rest required.
 //    Example: type UserDraft = Optional<User, "age">; // name and id required, age?
 //    Hint: combine Omit and Partial: `Omit<T, K> & Partial<Pick<T, K>>`.
+type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+type UserDraft = Optional<User, "age">;
+
+const draft1: UserDraft = { id: "u1", name: "Morgan" }; // age omitted — OK
+const draft2: UserDraft = { id: "u2", name: "Alex", age: 25 }; // age provided — OK
+// const draft3: UserDraft = { id: "u3", age: 30 };  // Error — name required
+console.log(`\nOptional<>: draft1=${draft1.name}, draft2=${draft2.name} (${draft2.age})`);
 //
 // 3. Write `type Getters<T> = { [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K] }`
 //    and also write `type Setters<T>` that produces setXxx methods taking T[K] and returning void.
 //    Combine them: `type Accessors<T> = Getters<T> & Setters<T>`.
+type Getters2<T> = { [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K] };
+
+type Setters<T> = { [K in keyof T as `set${Capitalize<string & K>}`]: (value: T[K]) => void };
+
+type Accessors<T> = Getters<T> & Setters<T>;
 //
 // 4. Write a conditional type `Flatten<T>` that:
 //    - If T is `Array<U>`, resolves to U
 //    - If T is `Promise<U>`, resolves to U
 //    - Otherwise resolves to T
 //    Hint: nested conditional with `infer`.
+type Flatten<T> = T extends Array<infer U> ? U : T extends Promise<infer U> ? U : T;
 //
 // 5. (Bonus) Write `type EventMap<Prefix extends string>` that takes a prefix
 //    and produces { [Prefix]Click; [Prefix]Hover; [Prefix]Focus } where each
