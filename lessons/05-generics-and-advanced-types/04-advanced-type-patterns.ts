@@ -380,7 +380,7 @@ type Actions = "Click" | "Hover" | "Focus";
 
 type EventMap<Prefix extends string> = { [A in Actions as `${Prefix}${A}`]: () => void };
 
-const actions: EventMap<"on"> = { onClick: () => void, onHover: () => void, onFocus: () => void }
+const actions: EventMap<"on"> = { onClick: () => {}, onHover: () => {}, onFocus: () => {} };
 
 console.log("\n--- Lesson 04 complete --- advanced type patterns");
 console.log("\n🎉 Week 5 complete! Next up: Vitest, testing, and the REST API project.");
