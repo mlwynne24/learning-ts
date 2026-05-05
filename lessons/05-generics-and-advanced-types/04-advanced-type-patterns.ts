@@ -376,6 +376,11 @@ type Flatten<T> = T extends Array<infer U> ? U : T extends Promise<infer U> ? U 
 //    and produces { [Prefix]Click; [Prefix]Hover; [Prefix]Focus } where each
 //    value is () => void. Use template literal types and mapped types.
 //    Example: EventMap<"on"> = { onClick: () => void; onHover: () => void; onFocus: () => void }
+type Actions = "Click" | "Hover" | "Focus";
+
+type EventMap<Prefix extends string> = { [A in Actions as `${Prefix}${A}`]: () => void };
+
+const actions: EventMap<"on"> = { onClick: () => void, onHover: () => void, onFocus: () => void }
 
 console.log("\n--- Lesson 04 complete --- advanced type patterns");
 console.log("\n🎉 Week 5 complete! Next up: Vitest, testing, and the REST API project.");
