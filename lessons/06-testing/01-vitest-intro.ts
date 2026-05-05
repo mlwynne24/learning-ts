@@ -186,11 +186,7 @@ for (const [cmd, desc] of commands) {
 
 // Names read in the output when tests fail. Make them describe BEHAVIOUR.
 
-const bad = [
-  'it("works", ...)',
-  'it("add test", ...)',
-  'it("returns 5", ...)',
-];
+const bad = ['it("works", ...)', 'it("add test", ...)', 'it("returns 5", ...)'];
 
 const good = [
   'it("sums two positive numbers", ...)',
@@ -259,21 +255,31 @@ for (const g of good) console.log(`      ${g}`);
 // =============================================================================
 // 1. Run `npm run test` now. You should see all the tests in the companion
 //    .test.ts file pass. If they don't, read the errors and investigate.
+// PASSED ALL
 //
 // 2. Open 01-vitest-intro.test.ts. Add a new test that asserts
 //    uniq([]) returns an empty array. Run `npm run test:watch` and watch it
 //    pass immediately.
+// DONE
 //
 // 3. Write a new pure function here — `slugify(input: string): string` — that
 //    lowercases the input, replaces spaces with "-", and strips non-alphanumeric
 //    characters. Export it. Then write 3+ tests for it in the .test.ts file,
 //    including edge cases (empty string, all punctuation, mixed case).
+export function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/\s/, "-")
+    .replace(/[^-a-zA-Z0-9]/g, "");
+}
 //
 // 4. Try making one of the existing tests FAIL deliberately — change `.toBe(5)`
 //    to `.toBe(6)`. Look at the failure output. Fix it. This is what a real
 //    failure will look like in CI.
+// DONE
 //
 // 5. (Bonus) Add a `describe.skip(...)` around one block. Run tests — notice
 //    how those are reported as skipped, not failing. Useful for TODO tests.
+// DONE
 
 console.log("\n--- Lesson 01 complete --- vitest intro (run: npm run test)");

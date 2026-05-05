@@ -2,7 +2,7 @@
 // Run with: npm run test  (or: npx vitest run lessons/06-testing)
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { add, greet, uniq, isAdult, type User } from "./01-vitest-intro.js";
+import { add, greet, uniq, isAdult, type User, slugify } from "./01-vitest-intro.js";
 
 // =============================================================================
 // 1. SIMPLE ASSERTIONS — add()
@@ -25,6 +25,10 @@ describe("add", () => {
     // Classic 0.1 + 0.2 === 0.30000000000000004 — don't use toBe here.
     expect(add(0.1, 0.2)).toBeCloseTo(0.3);
   });
+});
+
+describe.skip("add TODO", () => {
+  // Q6 TEST
 });
 
 // =============================================================================
@@ -154,5 +158,23 @@ describe("add (table-driven)", () => {
   ])("add($a, $b) = $expected", ({ a, b, expected }) => {
     // The $ placeholders get filled in the test name — nice output.
     expect(add(a, b)).toBe(expected);
+  });
+});
+
+// =============================================================================
+// Q3
+// =============================================================================
+
+describe("slugify", () => {
+  it("returns empty when input is an empty string", () => {
+    expect(slugify("")).toBe("");
+  });
+
+  it("returns empty string when input is all punctuation", () => {
+    expect(slugify(".%$!,")).toBe("");
+  });
+
+  it("returns '-'-separated output when input is mixed case", () => {
+    expect(slugify("Project Dragon!")).toBe("project-dragon");
   });
 });
