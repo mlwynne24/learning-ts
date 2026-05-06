@@ -253,19 +253,37 @@ for (const [op, desc] of cleanup) {
 // 1. Open 02-mocking-and-spies.test.ts. Read the existing tests for AlertService.
 //    Add a new test that verifies "info" alerts go to the slack channel and
 //    "error" alerts go to the pager channel, using a mock Notifier.
+// DONE
 //
 // 2. Using vi.spyOn on Math.random, write a test for a function
 //    `rollDice(): 1 | 2 | 3 | 4 | 5 | 6` (you can define it here). Verify
 //    that when Math.random returns 0, the roll is 1; when it returns 0.99...,
 //    the roll is 6. Restore after.
+type diceRollResult = 1 | 2 | 3 | 4 | 5 | 6;
+
+export function rollDice(): diceRollResult {
+  return (Math.floor(Math.random() * 6) + 1) as diceRollResult;
+}
 //
 // 3. Write a fake `InMemoryClock implements Clock` with a method `advance(ms: number)`
 //    that moves the clock forward. Use it to write a test for AlertService that
 //    makes the timestamp deterministic.
+export class InMemoryClock implements Clock {
+  constructor(private current: Date = new Date(0)) {}
+
+  now(): Date {
+    return new Date(this.current);
+  }
+
+  advance(ms: number): void {
+    this.current = new Date(this.current.getTime() + ms);
+  }
+}
 //
 // 4. (Bonus) Extract the `fetch` call in the CLI tool project (projects/01-cli-tool)
 //    into an injected `HttpClient` interface. Write a test that uses a mocked
 //    HttpClient to verify your code handles a 500 response correctly.
 //    This is the "design for testability" lesson applied in anger.
+// DECIDED TO SKIP BASED ON NEED TO REFACTOR CLI TOOL
 
 console.log("\n--- Lesson 02 complete --- mocking and spies (run: npm run test)");

@@ -7,7 +7,11 @@ import {
   InMemoryNotifier,
   type Clock,
   type Notifier,
+  rollDice,
+  InMemoryClock,
 } from "./02-mocking-and-spies.js";
+import { loadEnvFile } from "node:process";
+import { after } from "node:test";
 
 // =============================================================================
 // 1. vi.fn() — VERIFY CALLS
@@ -16,12 +20,14 @@ import {
 describe("AlertService with vi.fn()", () => {
   let notifier: Notifier;
   let clock: Clock;
+  let InMemClock: InMemoryClock;
 
   beforeEach(() => {
     // Fresh mocks per test. Keeps call histories isolated.
     notifier = { send: vi.fn() };
     // A fixed clock — every test sees the same "now".
     clock = { now: () => new Date("2026-04-16T12:00:00.000Z") };
+    InMemClock = new InMemoryClock();
   });
 
   afterEach(() => {
@@ -66,6 +72,15 @@ describe("AlertService with vi.fn()", () => {
 
     // For async rejections, use .rejects before the matcher.
     await expect(service.trigger("info", "hi")).rejects.toThrow("notifier down");
+  });
+
+  it.each([
+    ["info", "slack"],
+    ["error", "pager"],
+  ] as const)("routes %s alers to the %s channel", async (level, channel) => {
+    const service = new AlertService(notifier, clock);
+    await service.trigger(level, "msg");
+    expect(notifier.send).toHaveBeenCalledWith(channel, expect.any(String));
   });
 });
 
@@ -174,9 +189,9 @@ describe("mockImplementation", () => {
   it("lets you write arbitrary logic inside a mock", () => {
     const store = new Map<string, string>();
 
-    const get = vi.fn<(key: string) => string | undefined>().mockImplementation((key) =>
-      store.get(key),
-    );
+    const get = vi
+      .fn<(key: string) => string | undefined>()
+      .mockImplementation((key) => store.get(key));
     const set = vi.fn<(key: string, value: string) => void>().mockImplementation((key, value) => {
       store.set(key, value);
     });
@@ -198,5 +213,44 @@ describe("mockImplementation", () => {
     expect(fn()).toBe("second");
     expect(fn()).toBe("default");
     expect(fn()).toBe("default"); // stays on default
+  });
+});
+
+// =============================================================================
+// Q2 ANSWER
+// =============================================================================
+
+describe("rollDice", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("rolls 1 when Math.random returns 0", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    expect(rollDice()).toBe(1);
+  });
+
+  it("rolls 6 when Math.random returns 0.99", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
+    expect(rollDice()).toBe(6);
+  });
+});
+
+// =============================================================================
+// Q3 ANSWER
+// =============================================================================
+
+describe("AlertService with InMemoryClock", () => {
+  it("uses the clock's current time and advances when told", async () => {
+    const clock = new InMemoryClock(new Date("2026-04-16T12:00:00.000Z"));
+    const notifier = new InMemoryNotifier();
+    const service = new AlertService(notifier, clock);
+
+    await service.trigger("info", "first");
+    clock.advance(60_000); // 1 minute
+    await service.trigger("info", "second");
+
+    expect(notifier.sent[0]?.message).toBe("[2026-04-16T12:00:00.000Z] INFO: first");
+    expect(notifier.sent[1]?.message).toBe("[2026-04-16T12:01:00.000Z] INFO: second");
   });
 });
