@@ -2,6 +2,8 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    restoreMocks: true,
+    unstubEnvs: true,
     globals: true,
     include: ["**/*.test.ts"],
   },
