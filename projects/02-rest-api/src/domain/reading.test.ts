@@ -2,13 +2,14 @@ import { describe, it, expect, beforeEach } from "vitest";
 import {
   type SensorReading,
   type StoredReading,
+  type ReadingFilter,
   SensorReadingSchema,
   StoredReadingSchema,
+  ReadingFilterSchema,
 } from "./reading.js";
 
-describe("SensorReading", () => {
+describe("SensorReadingSchema", () => {
   let validSensor: SensorReading;
-  let validSensorStored: StoredReading;
 
   beforeEach(() => {
     validSensor = {
@@ -17,19 +18,10 @@ describe("SensorReading", () => {
       metric: "temperature",
       value: 99,
     };
-    validSensorStored = {
-      ...validSensor,
-      id: "145632asf4",
-      receivedAt: "2026-04-10T08:16:45Z",
-    };
   });
 
   it("accepts a known valid sensor reading", () => {
     expect(SensorReadingSchema.safeParse(validSensor).success).toBe(true);
-  });
-
-  it("accepts a known valid stored reading", () => {
-    expect(StoredReadingSchema.safeParse(validSensorStored).success).toBe(true);
   });
 
   it("coerces a string value to a number", () => {
@@ -55,13 +47,34 @@ describe("SensorReading", () => {
   });
 
   it("rejects an unknown metric", () => {
-    expect(SensorReadingSchema.safeParse({ ...validSensor, metric: "voltage" }).success).toBe(false);
+    expect(SensorReadingSchema.safeParse({ ...validSensor, metric: "voltage" }).success).toBe(
+      false,
+    );
   });
 
   it("rejects a non-ISO timestamp", () => {
     expect(
       SensorReadingSchema.safeParse({ ...validSensor, timestamp: "2026-04-10 08:15:30" }).success,
     ).toBe(false);
+  });
+});
+
+describe("StoredReadingSchema", () => {
+  let validSensorStored: StoredReading;
+
+  beforeEach(() => {
+    validSensorStored = {
+      deviceId: "2",
+      timestamp: "2026-04-10T08:15:30Z",
+      metric: "temperature",
+      value: 99,
+      id: "145632asf4",
+      receivedAt: "2026-04-10T08:16:45Z",
+    };
+  });
+
+  it("accepts a known valid stored reading", () => {
+    expect(StoredReadingSchema.safeParse(validSensorStored).success).toBe(true);
   });
 
   it("requires id and receivedAt on a stored reading", () => {
@@ -76,5 +89,52 @@ describe("SensorReading", () => {
     expect(
       StoredReadingSchema.safeParse({ ...validSensorStored, receivedAt: "yesterday" }).success,
     ).toBe(false);
+  });
+});
+
+describe("ReadingFilter", () => {
+  let validReadingFilter: ReadingFilter;
+
+  beforeEach(() => {
+    validReadingFilter = {
+      deviceId: "2",
+      metric: "temperature",
+      since: "2026-04-01T09:00:00Z",
+      until: "2026-10-01T09:00:00Z",
+      limit: 200,
+      offset: 2,
+    };
+  });
+
+  it("accepts a known valid reading filter", () => {
+    expect(ReadingFilterSchema.safeParse(validReadingFilter).success).toBe(true);
+  });
+
+  it("limit and offset are not required and default to correct values", () => {
+    const { limit: _limit, offset: _offset, ...withoutDefaultFields } = validReadingFilter;
+    const parsedReadingFilter = ReadingFilterSchema.safeParse(withoutDefaultFields);
+    expect(parsedReadingFilter.success).toBe(true);
+    expect(parsedReadingFilter.data?.offset).toBe(0);
+    expect(parsedReadingFilter.data?.limit).toBe(50);
+  });
+
+  it("accepts limit at the 1 and 500 boundaries", () => {
+    expect(ReadingFilterSchema.safeParse({ ...validReadingFilter, limit: 1 }).success).toBe(true);
+    expect(ReadingFilterSchema.safeParse({ ...validReadingFilter, limit: 500 }).success).toBe(true);
+  });
+
+  it("rejects negative values for offset", () => {
+    expect(ReadingFilterSchema.safeParse({ ...validReadingFilter, offset: -1 }).success).toBe(
+      false,
+    );
+  });
+
+  it("rejects float values for limit and offset", () => {
+    expect(ReadingFilterSchema.safeParse({ ...validReadingFilter, limit: 1.1 }).success).toBe(
+      false,
+    );
+    expect(ReadingFilterSchema.safeParse({ ...validReadingFilter, offset: 5.67 }).success).toBe(
+      false,
+    );
   });
 });
