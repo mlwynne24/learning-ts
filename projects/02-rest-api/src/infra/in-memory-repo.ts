@@ -1,8 +1,10 @@
 import { SensorReading, ReadingFilter, StoredReading } from "../domain/reading.js";
 import { ReadingRepository } from "./repository.js";
 
-class InMemoryReadingRepository implements ReadingRepository {
-  private readings: Array<StoredReading> = [];
+export class InMemoryReadingRepository implements ReadingRepository {
+  constructor(public readings: Array<StoredReading> = []) {
+    this.readings = readings
+  }
 
   async insert(reading: SensorReading): Promise<StoredReading> {
     const newStoredReading = {
@@ -30,7 +32,7 @@ class InMemoryReadingRepository implements ReadingRepository {
       r.deviceId === filter.deviceId &&
         r.metric === filter.metric &&
         r.timestamp >= filter.since &&
-        r.timestamp < filter.until;
+        r.timestamp < filter.until
     });
     return {
       items: readings.slice(filter.offset).slice(0, filter.limit),
