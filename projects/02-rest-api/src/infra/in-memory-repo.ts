@@ -1,19 +1,22 @@
 import { SensorReading, ReadingFilter, StoredReading } from "../domain/reading.js";
 import { ReadingRepository } from "./repository.js";
 
+type Clock = () => string;
+type idGen = () => string;
+
 export class InMemoryReadingRepository implements ReadingRepository {
-  constructor(public readings: Array<StoredReading> = []) {
-    this.readings = readings
+  constructor(
+    public readings: Array<StoredReading> = [],
+    private clock: Clock = () => new Date().toISOString(),
+    private idGen: idGen = () => crypto.randomUUID(),
+  ) {
+    this.readings = readings;
   }
 
   async insert(reading: SensorReading): Promise<StoredReading> {
-    const newStoredReading = {
-      ...reading,
-      id: crypto.randomUUID(),
-      receivedAt: new Date().toISOString(),
-    };
-    this.readings.push(newStoredReading);
-    return newStoredReading;
+    const stored = { ...reading, id: this.idGen(), receivedAt: this.clock() };
+    this.readings.push(stored);
+    return stored;
   }
 
   async findById(id: string): Promise<StoredReading | undefined> {
@@ -32,7 +35,7 @@ export class InMemoryReadingRepository implements ReadingRepository {
       r.deviceId === filter.deviceId &&
         r.metric === filter.metric &&
         r.timestamp >= filter.since &&
-        r.timestamp < filter.until
+        r.timestamp < filter.until;
     });
     return {
       items: readings.slice(filter.offset).slice(0, filter.limit),
