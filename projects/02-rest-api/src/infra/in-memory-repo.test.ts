@@ -83,7 +83,7 @@ describe("InMemoryReadingRepository insert()", () => {
     ]);
   });
 
-  it("Does not mutate the caller's input object", async () => {
+  it("does not mutate the caller's input object", async () => {
     const repo = makeRepo({ ids: ["uuid-1"] });
 
     const input = makeSensorReading();
