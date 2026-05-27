@@ -28,14 +28,16 @@ function makeStoredReading(overrides: Partial<StoredReading> = {}): StoredReadin
 function makeRepo(
   opts: {
     seed?: StoredReading[];
-    now?: string;
+    nows?: string[];
     ids?: string[];
   } = {},
 ) {
-  const fixedNow = opts.now ?? "2026-05-22T10:00:00.000Z";
+  const nowQueue = [...(opts.nows ?? ["2026-05-22T10:00:00.000Z"])];
   const idQueue = [...(opts.ids ?? ["test-id-1", "test-id-2", "test-id-3"])];
 
-  const clock = () => fixedNow;
+  const clock = () => {
+    return nowQueue.length > 1 ? nowQueue.shift()! : nowQueue[0];
+  };
   const idGen = () => {
     const next = idQueue.shift();
     if (!next) throw new Error("makeRepo: ran out of fake ids — pass more in `ids`");
@@ -45,9 +47,9 @@ function makeRepo(
   return new InMemoryReadingRepository(opts.seed ?? [], clock, idGen);
 }
 
-describe("InMemoryReadingRepository", () => {
+describe("InMemoryReadingRepository insert()", () => {
   it("returns a stored reading with the input fields plus id and receivedAt", async () => {
-    const repo = makeRepo({ now: "2026-05-22T10:00:00.000Z", ids: ["uuid-1"] });
+    const repo = makeRepo({ nows: ["2026-05-22T10:00:00.000Z"], ids: ["uuid-1"] });
     const stored = await repo.insert(makeSensorReading());
 
     expect(stored).toEqual({
@@ -55,5 +57,49 @@ describe("InMemoryReadingRepository", () => {
       id: "uuid-1",
       receivedAt: "2026-05-22T10:00:00.000Z",
     });
+  });
+
+  it("appends the stored reading to readings", async () => {
+    const newId = "uuid-1";
+    const now = "2026-05-22T10:00:00.000Z";
+    const repo = makeRepo({ nows: [now], ids: [newId] });
+    const newStored = await repo.insert(makeSensorReading());
+
+    expect(repo.readings).toHaveLength(1);
+    expect(repo.readings.at(-1)).toEqual(makeStoredReading({ id: newId, receivedAt: now }));
+  });
+
+  it("generates a fresh id and receivedAt per call across multiple inserts", async () => {
+    const repo = makeRepo({
+      nows: ["2026-05-22T10:00:00.000Z", "2026-06-22T10:00:00.000Z"],
+      ids: ["uuid-1", "uuid-2"],
+    });
+    await repo.insert(makeSensorReading());
+    await repo.insert(makeSensorReading());
+
+    expect(repo.readings).toEqual([
+      expect.objectContaining({ id: "uuid-1", receivedAt: "2026-05-22T10:00:00.000Z" }),
+      expect.objectContaining({ id: "uuid-2", receivedAt: "2026-06-22T10:00:00.000Z" }),
+    ]);
+  });
+
+  it("Does not mutate the caller's input object", async () => {
+    const repo = makeRepo({ ids: ["uuid-1"] });
+
+    const input = makeSensorReading();
+    const snapshot = structuredClone(input);
+
+    await repo.insert(input);
+
+    expect(input).toEqual(snapshot);
+  });
+
+  it("preserves insertion order in readings", async () => {
+    const initReading = makeStoredReading({ id: "uuid-1" });
+    const repo = makeRepo({ seed: [initReading], ids: ["uuid-2"] });
+    await repo.insert(makeSensorReading());
+
+    expect(repo.readings.at(0)).toBe(initReading);
+    expect(repo.readings.at(-1)?.id).toBe("uuid-2");
   });
 });
